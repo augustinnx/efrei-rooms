@@ -6,6 +6,7 @@ const sequelize = require('./config/database');
 require('./models'); // charge les 7 modèles et leurs relations
 
 const authRoutes = require('./routes/auth');
+const roomRoutes = require('./routes/rooms');
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.get('/api/health', (req, res) => {
 
 // Toutes les routes d'authentification commencent par /api/auth
 app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
 
 const PORT = process.env.PORT || 3000;
 
