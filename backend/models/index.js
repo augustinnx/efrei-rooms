@@ -13,10 +13,6 @@ const BookingParticipant = require('./BookingParticipant');
 Campus.hasMany(Room, { foreignKey: 'campusId' });
 Room.belongsTo(Campus, { foreignKey: 'campusId' });
 
-// Un campus a plusieurs utilisateurs, un utilisateur appartient à un campus
-Campus.hasMany(User, { foreignKey: 'campusId' });
-User.belongsTo(Campus, { foreignKey: 'campusId' });
-
 // Une matière a plusieurs profs, un prof enseigne une matière
 Subject.hasMany(Teacher, { foreignKey: 'subjectId' });
 Teacher.belongsTo(Subject, { foreignKey: 'subjectId' });

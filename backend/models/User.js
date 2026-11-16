@@ -34,11 +34,6 @@ const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'student',
   },
-  // Clé étrangère : le campus de l'utilisateur
-  campusId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
 });
 
 module.exports = User;

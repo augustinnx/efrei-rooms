@@ -26,12 +26,7 @@ const Room = sequelize.define('Room', {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
-  // true si c'est une salle de permanence (pour le tableau de bord)
-  isPermanence: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
+
   // Clé étrangère : le campus auquel appartient la salle
   campusId: {
     type: DataTypes.INTEGER,

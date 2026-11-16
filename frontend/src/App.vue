@@ -8,6 +8,7 @@ import { RouterLink, RouterView } from 'vue-router'
       <span class="brand">EFREI Rooms</span>
       <nav>
         <RouterLink to="/">Accueil</RouterLink>
+        <RouterLink to="/register">Inscription</RouterLink>
       </nav>
     </div>
   </header>

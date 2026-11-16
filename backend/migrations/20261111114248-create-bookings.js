@@ -36,7 +36,7 @@ module.exports = {
         onDelete: 'RESTRICT',
       },
       type: {
-        type: Sequelize.ENUM('revision', 'chill', 'projet'),
+        type: Sequelize.ENUM('revision', 'chill', 'projet', 'permanence'),
         allowNull: false,
         defaultValue: 'revision',
       },
@@ -44,6 +44,11 @@ module.exports = {
         type: Sequelize.ENUM('open', 'closed'),
         allowNull: false,
         defaultValue: 'open',
+      },
+            maxParticipants: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 40,
       },
       date: {
         type: Sequelize.DATEONLY,

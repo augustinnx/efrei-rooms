@@ -16,8 +16,6 @@ module.exports = {
       { campusId: 4, letters: ['N'] }, // New Republic
     ];
 
-    // Une salle de permanence par campus (à changer quand tu veux)
-    const permanences = ['A5', 'K3', 'H7', 'N2'];
 
     const rooms = [];
     for (const { campusId, letters } of lettersByCampus) {
@@ -28,7 +26,6 @@ module.exports = {
             name,
             capacity: 40,
             equipment: null,
-            isPermanence: permanences.includes(name),
             campusId,
             createdAt: now,
             updatedAt: now,

@@ -25,7 +25,7 @@ const Booking = sequelize.define('Booking', {
   },
   // Le type de réservation
   type: {
-    type: DataTypes.ENUM('revision', 'chill', 'projet'),
+        type: DataTypes.ENUM('revision', 'chill', 'projet', 'permanence'),
     allowNull: false,
     defaultValue: 'revision',
   },
@@ -34,6 +34,13 @@ const Booking = sequelize.define('Booking', {
     type: DataTypes.ENUM('open', 'closed'),
     allowNull: false,
     defaultValue: 'open',
+  },
+    // Nombre de places maximum (limité à 40, la capacité d'une salle)
+  maxParticipants: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 40,
+    validate: { min: 1, max: 40 },
   },
   // Le jour de la réservation (sans l'heure)
   date: {

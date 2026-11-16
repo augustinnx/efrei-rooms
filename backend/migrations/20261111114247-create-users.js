@@ -36,14 +36,6 @@ module.exports = {
         allowNull: false,
         defaultValue: 'student',
       },
-      // Clé étrangère : le campus de l'utilisateur
-      campusId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: 'Campuses', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

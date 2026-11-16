@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
-const { User, Campus } = require('../models');
+const { User } = require('../models');
 
 // ---------- INSCRIPTION ----------
 async function register(req, res) {
@@ -11,18 +11,12 @@ async function register(req, res) {
       return res.status(400).json({ message: errors.array()[0].msg });
     }
 
-    const { firstName, lastName, email, password, campusId } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // 2. L'email est-il déjà utilisé ?
     const existing = await User.findOne({ where: { email } });
     if (existing) {
       return res.status(409).json({ message: 'Cet email est déjà utilisé.' });
-    }
-
-    // 3. Le campus existe-t-il ?
-    const campus = await Campus.findByPk(campusId);
-    if (!campus) {
-      return res.status(400).json({ message: "Ce campus n'existe pas." });
     }
 
     // 4. On hashe le mot de passe (10 = nombre de tours de calcul)
@@ -36,7 +30,6 @@ async function register(req, res) {
       email,
       passwordHash,
       role: 'student',
-      campusId,
     });
 
     // 6. On le connecte directement : on stocke son id et son rôle dans la session
@@ -50,7 +43,6 @@ async function register(req, res) {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
-      campusId: user.campusId,
     });
   } catch (error) {
     console.error(error);
@@ -89,7 +81,6 @@ async function login(req, res) {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
-      campusId: user.campusId,
     });
   } catch (error) {
     console.error(error);
@@ -111,7 +102,7 @@ function logout(req, res) {
 async function me(req, res) {
   try {
     const user = await User.findByPk(req.session.userId, {
-      attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'campusId'], // pas de passwordHash
+      attributes: ['id', 'firstName', 'lastName', 'email', 'role' ], // pas de passwordHash
     });
     if (!user) {
       return res.status(401).json({ message: 'Utilisateur introuvable.' });

@@ -25,11 +25,6 @@ module.exports = {
         type: Sequelize.STRING(255),
         allowNull: true,
       },
-      isPermanence: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
       // Clé étrangère : pointe vers l'id d'un campus
       campusId: {
         type: Sequelize.INTEGER,

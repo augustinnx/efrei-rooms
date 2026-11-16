@@ -9,11 +9,16 @@ const router = express.Router();
 const registerRules = [
   body('firstName').trim().notEmpty().withMessage('Le prénom est obligatoire.'),
   body('lastName').trim().notEmpty().withMessage('Le nom est obligatoire.'),
-  body('email').trim().isEmail().withMessage('Email invalide.').normalizeEmail(),
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Email invalide.')
+    .normalizeEmail()
+    .custom((value) => value.endsWith('@efrei.net'))
+    .withMessage('Utilisez votre adresse @efrei.net.'),
   body('password')
     .isLength({ min: 8 })
     .withMessage('Le mot de passe doit faire au moins 8 caractères.'),
-  body('campusId').isInt({ min: 1 }).withMessage('Choisissez un campus.'),
 ];
 
 // Règles de validation pour la connexion
