@@ -1,35 +1,88 @@
-@import './base.css';
+/* Variables : définies une fois, réutilisées partout */
+:root {
+  --color-primary: #1d4ed8;
+  --color-bg: #f3f4f6;
+  --color-text: #1f2937;
+  --color-card: #ffffff;
+  --color-error: #b91c1c;
+  --radius: 8px;
+}
 
+/* Sélecteur de BALISE : s'applique à tout le <body> */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--color-bg);
+  /* HÉRITAGE : cette couleur est transmise à tous les éléments à l'intérieur */
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* Sélecteur d'ID : un seul élément (le <div id="app"> de index.html) */
 #app {
-  max-width: 1280px;
+  min-height: 100vh;
+}
+
+/* Sélecteurs de CLASSE : réutilisables sur plusieurs éléments */
+.container {
+  max-width: 960px;
   margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  padding: 1rem;
 }
 
-a,
-.green {
+.topbar {
+  background: var(--color-primary);
+  color: white;
+}
+
+.topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.topbar a {
+  color: white;
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+  margin-left: 1rem;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+/* Sélecteur d'ATTRIBUT : cible les champs selon leur type */
+input[type='text'],
+input[type='email'],
+input[type='password'] {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius);
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+.error {
+  color: var(--color-error);
+}
+
+/* Mobile d'abord : une seule colonne par défaut */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+/* Écran à partir de 700px : deux colonnes. C'est LA règle responsive. */
+@media (min-width: 700px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
