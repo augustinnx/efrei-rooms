@@ -1,17 +1,20 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import AppFooter from './components/AppFooter.vue'
 </script>
 
 <template>
   <header class="topbar">
     <div class="container topbar-inner">
-      <span class="brand">EFREI Rooms</span>
+      <RouterLink to="/" class="brand">EFREI Rooms</RouterLink>
       <nav>
-        <RouterLink to="/">Accueil</RouterLink>
+        <RouterLink to="/login">Connexion</RouterLink>
         <RouterLink to="/register">Inscription</RouterLink>
       </nav>
     </div>
   </header>
 
   <RouterView />
+
+  <AppFooter />
 </template>

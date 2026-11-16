@@ -21,6 +21,12 @@ body {
 /* Sélecteur d'ID : un seul élément (le <div id="app"> de index.html) */
 #app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#app > main {
+  flex: 1; /* le contenu prend la place disponible : le footer reste en bas */
 }
 
 /* Sélecteurs de CLASSE : réutilisables sur plusieurs éléments */
@@ -78,6 +84,85 @@ input[type='password'] {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
+}
+
+.brand {
+  color: white;
+  text-decoration: none;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  text-decoration: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+.footer {
+  background: var(--color-card);
+  border-top: 1px solid #e5e7eb;
+  margin-top: 2rem;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer a {
+  color: var(--color-text);
+  margin-right: 1rem;
+}
+
+/* À partir de 700px : texte à gauche, image à droite */
+@media (min-width: 700px) {
+  .hero {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 /* Écran à partir de 700px : deux colonnes. C'est LA règle responsive. */

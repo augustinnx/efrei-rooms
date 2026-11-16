@@ -1,30 +1,27 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-
-const campuses = ref([])
-const error = ref('')
-
-onMounted(async () => {
-  try {
-    const response = await fetch('http://localhost:3000/api/rooms/campuses')
-    if (!response.ok) throw new Error('Erreur serveur')
-    campuses.value = await response.json()
-  } catch (e) {
-    error.value = 'Impossible de charger les campus.'
-  }
-})
+import heroImage from '../assets/hero.svg'
 </script>
 
 <template>
-  <main class="container">
-    <h1>Réservation de salles EFREI</h1>
-
-    <p v-if="error" class="error">{{ error }}</p>
-
-    <div v-else class="grid">
-      <div v-for="campus in campuses" :key="campus.id" class="card">
-        <h2>{{ campus.name }}</h2>
+  <main>
+    <section class="hero container">
+      <div class="hero-text">
+        <h1>EFREI Rooms</h1>
+        <p class="tagline">
+          Trouve une salle libre, réserve-la et révise avec d'autres étudiants.
+        </p>
+        <p>
+          Réserve une salle sur n'importe quel campus, dis ce que tu veux réviser
+          et laisse les autres te rejoindre. Fini les couloirs à chercher une
+          salle vide.
+        </p>
+        <div class="hero-buttons">
+          <RouterLink to="/register" class="btn">Inscription</RouterLink>
+          <RouterLink to="/login" class="btn btn-secondary">Connexion</RouterLink>
+        </div>
       </div>
-    </div>
+
+      <img :src="heroImage" alt="Planning de réservation de salles" class="hero-image" />
+    </section>
   </main>
 </template>
