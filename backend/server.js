@@ -7,6 +7,7 @@ require('./models'); // charge les 7 modèles et leurs relations
 
 const authRoutes = require('./routes/auth');
 const roomRoutes = require('./routes/rooms');
+const bookingRoutes = require('./routes/bookings');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.get('/api/health', (req, res) => {
 // Toutes les routes d'authentification commencent par /api/auth
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 const PORT = process.env.PORT || 3000;
 
