@@ -6,7 +6,7 @@ import heroImage from '../assets/hero.svg'
   <main>
     <section class="hero container">
       <div class="hero-text">
-        <h1>EFREI Rooms</h1>
+        <h1>EF'Room</h1>
         <p class="tagline">
           Trouve une salle libre, réserve-la et révise avec d'autres étudiants.
         </p>

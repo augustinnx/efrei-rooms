@@ -7,10 +7,6 @@ import AppFooter from './components/AppFooter.vue'
   <header class="topbar">
     <div class="container topbar-inner">
       <RouterLink to="/" class="brand">EFREI Rooms</RouterLink>
-      <nav>
-        <RouterLink to="/login">Connexion</RouterLink>
-        <RouterLink to="/register">Inscription</RouterLink>
-      </nav>
     </div>
   </header>
 
