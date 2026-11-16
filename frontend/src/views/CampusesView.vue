@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
+
 const campuses = ref([])
 const error = ref('')
 
@@ -13,6 +14,7 @@ onMounted(async () => {
     error.value = 'Impossible de charger les campus.'
   }
 })
+
 </script>
 
 <template>
@@ -26,5 +28,7 @@ onMounted(async () => {
         <h2>{{ campus.name }}</h2>
       </div>
     </div>
+
+
   </main>
 </template>

@@ -165,6 +165,14 @@ input[type='password'] {
   }
 }
 
+.link-button {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  margin: 0;
+  padding: 0.3rem 0.8rem;
+}
+
 /* Écran à partir de 700px : deux colonnes. C'est LA règle responsive. */
 @media (min-width: 700px) {
   .grid {
