@@ -73,7 +73,8 @@ async function join(booking) {
         {{ formatDate(b.date) }}, de {{ b.startTime.slice(0, 5) }} à {{ b.endTime.slice(0, 5) }}
         <span v-if="b.Subject"> · {{ b.Subject.name }}</span>
       </p>
-      <span v-if="b.myStatus" class="badge">Inscrit</span>
+      <span v-if="b.isMine" class="badge">Créée par vous</span>
+      <span v-else-if="b.myStatus" class="badge">Inscrit</span>
       <span v-else-if="b.taken >= b.maxParticipants" class="badge">Complet</span>
       <button v-else type="button" @click="join(b)">Rejoindre</button>
     </div>

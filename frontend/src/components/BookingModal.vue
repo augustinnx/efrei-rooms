@@ -37,13 +37,23 @@ const subjects = ref([])
 const error = ref('')
 const loading = ref(false)
 
-// On récupère les matières pour la liste déroulante
+const isAdmin = ref(false)
+
 onMounted(async () => {
+  // On récupère les matières pour la liste déroulante
   try {
     const response = await fetch('http://localhost:3000/api/rooms/subjects')
     subjects.value = await response.json()
   } catch (e) {
     error.value = 'Impossible de charger les matières.'
+  }
+
+  // On demande qui est connecté, pour savoir s'il est admin
+  try {
+    const me = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' })
+    if (me.ok) isAdmin.value = (await me.json()).role === 'admin'
+  } catch (e) {
+    isAdmin.value = false
   }
 })
 
@@ -58,7 +68,7 @@ function validate() {
   const day = new Date(`${f.date}T12:00:00`).getDay()
   if (day === 0 || day === 6) return 'Réservation possible du lundi au vendredi.'
   if (f.endHour <= f.startHour) return "L'heure de fin doit être après l'heure de début."
-  if (f.type === 'revision' && !f.subjectId) return 'Choisissez une matière.'
+  if ((f.type === 'revision' || f.type === 'permanence') && !f.subjectId) return 'Choisissez une matière.'
   if (f.maxParticipants < 1 || f.maxParticipants > props.room.capacity) {
     return `Le nombre de places doit être entre 1 et ${props.room.capacity}.`
   }
@@ -127,10 +137,11 @@ async function submit() {
           <option value="revision">Révision</option>
           <option value="chill">Détente</option>
           <option value="projet">Projet de groupe</option>
+          <option v-if="isAdmin" value="permanence">Permanence (admin)</option>
         </select>
 
         <!-- La matière n'apparaît que pour une révision -->
-        <template v-if="form.type === 'revision'">
+        <template v-if="form.type === 'revision' || form.type === 'permanence'">
           <label for="subject">Matière</label>
           <select id="subject" v-model.number="form.subjectId">
             <option value="" disabled>Choisir une matière</option>
