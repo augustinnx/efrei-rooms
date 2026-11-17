@@ -8,4 +8,3 @@ check list et idées a rajouter :
 - logo insta/linkedin/mail sur le footer pour nous contacter (donc peut etre enlever le 'contactez nous')
 - 
 
-first commit
