@@ -1,7 +1,6 @@
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
-const { Booking, BookingParticipant, Room, Subject, User } = require('../models');
-
+const { Booking, BookingParticipant, Campus, Room, Subject, User } = require('../models');
 // Transforme une date JavaScript en texte "AAAA-MM-JJ"
 function toDateString(d) {
   const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -354,4 +353,64 @@ async function listMyBookings(req, res) {
   }
 }
 
-module.exports = { listBookings, createBooking, joinBooking, deleteBooking, updateBooking, listMyBookings };
+// ---------- RÉSERVATIONS À VENIR (page d'accueil) ----------
+// GET /api/bookings/upcoming : tout ce qui se passe dans les 7 prochains jours
+async function listUpcoming(req, res) {
+  try {
+    const now = new Date();
+    const today = toDateString(now);
+    const limit = new Date();
+    limit.setDate(limit.getDate() + 7);
+
+    const bookings = await Booking.findAll({
+      where: {
+        status: { [Op.ne]: 'cancelled' },
+        date: { [Op.between]: [today, toDateString(limit)] },
+      },
+      include: [
+        {
+          model: Room,
+          attributes: ['id', 'name', 'campusId'],
+          include: [{ model: Campus, attributes: ['id', 'name'] }],
+        },
+        { model: Subject, attributes: ['id', 'name'] },
+        { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName'] },
+        { model: BookingParticipant, attributes: ['userId', 'status'] },
+      ],
+      order: [['date', 'ASC'], ['startTime', 'ASC']],
+    });
+
+    const me = req.session.userId;
+
+    const data = bookings
+      // on retire les créneaux d'aujourd'hui déjà terminés
+      .filter((b) => b.date !== today || parseInt(b.endTime.slice(0, 2), 10) > now.getHours())
+      .map((b) => {
+        const json = b.toJSON();
+        const accepted = json.BookingParticipants.filter((p) => p.status === 'accepted').length;
+        const mine = json.BookingParticipants.find((p) => p.userId === me);
+        delete json.BookingParticipants; // on ne renvoie pas la liste des participants
+        return {
+          ...json,
+          taken: accepted + 1, // participants acceptés + le créateur
+          isMine: json.creatorId === me,
+          myStatus: mine ? mine.status : null,
+        };
+      });
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = {
+  listBookings,
+  createBooking,
+  joinBooking,
+  deleteBooking,
+  updateBooking,
+  listMyBookings,
+  listUpcoming,
+};

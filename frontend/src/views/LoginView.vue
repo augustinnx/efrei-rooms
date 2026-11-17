@@ -39,7 +39,7 @@ async function submit() {
       return
     }
 
-    router.push('/campuses') // connecté : on va vers la page des campus
+    router.push('/dashboard') // connecté : on arrive sur la page d'accueil
   } catch (e) {
     error.value = 'Serveur injoignable.'
   } finally {

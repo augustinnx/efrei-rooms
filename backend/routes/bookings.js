@@ -7,6 +7,7 @@ const {
   deleteBooking,
   updateBooking,
   listMyBookings,
+  listUpcoming,
 } = require('../controllers/bookingController');
 const { requireAuth } = require('../middleware/auth');
 
@@ -30,6 +31,8 @@ router.get('/', requireAuth, listBookings);
 
 // GET /api/bookings/mine  -> mes réservations (créées et rejointes)
 router.get('/mine', requireAuth, listMyBookings);
+// GET /api/bookings/upcoming  -> ce qui se passe cette semaine (page d'accueil)
+router.get('/upcoming', requireAuth, listUpcoming);
 
 // POST /api/bookings  -> créer une réservation (connecté)
 router.post('/', requireAuth, bookingRules, createBooking);
