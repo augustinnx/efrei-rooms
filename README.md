@@ -1,3 +1,4 @@
+
 check list et idées a rajouter :
 
 - bouton déconnexion a remplacer par un logo plus joli (lucide.dev)
@@ -6,3 +7,5 @@ check list et idées a rajouter :
 - logo de l'EFREI manquant
 - logo insta/linkedin/mail sur le footer pour nous contacter (donc peut etre enlever le 'contactez nous')
 - 
+
+first commit
