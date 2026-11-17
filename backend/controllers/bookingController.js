@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
-const { Booking, Room, Subject, User } = require('../models');
+const { Booking, BookingParticipant, Room, Subject, User } = require('../models');
 
 // Transforme une date JavaScript en texte "AAAA-MM-JJ"
 function toDateString(d) {
@@ -147,4 +147,89 @@ async function createBooking(req, res) {
   }
 }
 
-module.exports = { listBookings, createBooking };
+// ---------- REJOINDRE UNE RÉSERVATION ----------
+// POST /api/bookings/:id/join
+async function joinBooking(req, res) {
+  try {
+    const bookingId = parseInt(req.params.id, 10);
+    if (Number.isNaN(bookingId)) {
+      return res.status(400).json({ message: 'Identifiant invalide.' });
+    }
+
+    // 1. La réservation existe-t-elle ?
+    const booking = await Booking.findByPk(bookingId);
+    if (!booking || booking.status === 'cancelled') {
+      return res.status(404).json({ message: 'Réservation introuvable.' });
+    }
+
+    // 2. Le créateur est déjà dedans d'office
+    if (booking.creatorId === req.session.userId) {
+      return res.status(400).json({ message: 'Vous êtes le créateur de cette réservation.' });
+    }
+
+    // 3. La réservation est-elle déjà terminée ?
+    const now = new Date();
+    const endHour = parseInt(booking.endTime.slice(0, 2), 10);
+    if (booking.date < toDateString(now) || (booking.date === toDateString(now) && endHour <= now.getHours())) {
+      return res.status(400).json({ message: 'Cette réservation est terminée.' });
+    }
+
+    // 4. A-t-on déjà rejoint ?
+    const already = await BookingParticipant.findOne({
+      where: { bookingId, userId: req.session.userId },
+    });
+    if (already) {
+      return res.status(409).json({ message: 'Vous avez déjà demandé à rejoindre cette réservation.' });
+    }
+
+    // 5. Reste-t-il de la place ? (participants acceptés + le créateur)
+    const taken = (await BookingParticipant.count({ where: { bookingId, status: 'accepted' } })) + 1;
+    if (taken >= booking.maxParticipants) {
+      return res.status(409).json({ message: 'Cette réservation est complète.' });
+    }
+
+    // 6. Groupe ouvert : accepté tout de suite. Groupe fermé : en attente du créateur.
+    const status = booking.visibility === 'open' ? 'accepted' : 'pending';
+    const participant = await BookingParticipant.create({
+      bookingId,
+      userId: req.session.userId,
+      status,
+    });
+
+    res.status(201).json(participant);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+// ---------- SUPPRIMER UNE RÉSERVATION ----------
+// DELETE /api/bookings/:id
+async function deleteBooking(req, res) {
+  try {
+    const bookingId = parseInt(req.params.id, 10);
+    if (Number.isNaN(bookingId)) {
+      return res.status(400).json({ message: 'Identifiant invalide.' });
+    }
+
+    const booking = await Booking.findByPk(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Réservation introuvable.' });
+    }
+
+    // AUTORISATION : seul le créateur ou un admin peut supprimer
+    if (booking.creatorId !== req.session.userId && req.session.role !== 'admin') {
+      return res.status(403).json({ message: "Vous ne pouvez supprimer que vos propres réservations." });
+    }
+
+    // Les participants sont supprimés automatiquement (ON DELETE CASCADE)
+    await booking.destroy();
+
+    res.json({ message: 'Réservation supprimée.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = { listBookings, createBooking, joinBooking, deleteBooking };

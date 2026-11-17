@@ -1,6 +1,11 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { listBookings, createBooking } = require('../controllers/bookingController');
+const {
+  listBookings,
+  createBooking,
+  joinBooking,
+  deleteBooking,
+} = require('../controllers/bookingController');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -23,5 +28,11 @@ router.get('/', requireAuth, listBookings);
 
 // POST /api/bookings  -> créer une réservation (connecté)
 router.post('/', requireAuth, bookingRules, createBooking);
+
+// POST /api/bookings/5/join  -> rejoindre la réservation 5
+router.post('/:id/join', requireAuth, joinBooking);
+
+// DELETE /api/bookings/5  -> supprimer la réservation 5 (créateur ou admin)
+router.delete('/:id', requireAuth, deleteBooking);
 
 module.exports = router;
