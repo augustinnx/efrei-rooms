@@ -9,6 +9,7 @@ check list et idées a rajouter :
 - le bouton campus sur le bandeau a changer, par un bouton Accueil qui renvoie sur la page princiaple après connexin. Cette page comprendra des cartes avec les permannces de la semaine, les reservations de la journée.
 - plan 2D des batiments
 - un bouton filtre pour directement filtrer kles salles dispo/campus/heures voulu/matiere/privée/public
+- changer le logo visible sur la page web + le titre
 
 
 
