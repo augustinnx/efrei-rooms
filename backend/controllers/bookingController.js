@@ -232,4 +232,80 @@ async function deleteBooking(req, res) {
   }
 }
 
-module.exports = { listBookings, createBooking, joinBooking, deleteBooking };
+// ---------- MODIFIER UNE RÉSERVATION ----------
+// PUT /api/bookings/:id
+// On peut changer : description, visibilité, nombre de places, matière.
+// (Pour changer la salle ou l'heure, on supprime et on recrée : ça évite de refaire la détection de conflit.)
+async function updateBooking(req, res) {
+  try {
+    const bookingId = parseInt(req.params.id, 10);
+    if (Number.isNaN(bookingId)) {
+      return res.status(400).json({ message: 'Identifiant invalide.' });
+    }
+
+    const booking = await Booking.findByPk(bookingId);
+    if (!booking || booking.status === 'cancelled') {
+      return res.status(404).json({ message: 'Réservation introuvable.' });
+    }
+
+    // AUTORISATION : seul le créateur ou un admin peut modifier
+    if (booking.creatorId !== req.session.userId && req.session.role !== 'admin') {
+      return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres réservations.' });
+    }
+
+    const { description, visibility, maxParticipants, subjectId } = req.body;
+
+    // Visibilité
+    if (visibility !== undefined) {
+      if (!['open', 'closed'].includes(visibility)) {
+        return res.status(400).json({ message: 'Visibilité invalide.' });
+      }
+      booking.visibility = visibility;
+    }
+
+    // Nombre de places : entre 1 et 40, et pas moins que les participants déjà acceptés
+    if (maxParticipants !== undefined) {
+      const max = parseInt(maxParticipants, 10);
+      if (Number.isNaN(max) || max < 1 || max > 40) {
+        return res.status(400).json({ message: 'Le nombre de places doit être entre 1 et 40.' });
+      }
+      const taken = (await BookingParticipant.count({ where: { bookingId, status: 'accepted' } })) + 1;
+      if (max < taken) {
+        return res.status(409).json({ message: `Il y a déjà ${taken} participants, vous ne pouvez pas descendre en dessous.` });
+      }
+      booking.maxParticipants = max;
+    }
+
+    // Matière : obligatoire pour une révision, et elle doit exister
+    if (subjectId !== undefined) {
+      if (subjectId === null) {
+        if (booking.type === 'revision') {
+          return res.status(400).json({ message: 'Une révision doit avoir une matière.' });
+        }
+        booking.subjectId = null;
+      } else {
+        const subject = await Subject.findByPk(subjectId);
+        if (!subject) {
+          return res.status(400).json({ message: "Cette matière n'existe pas." });
+        }
+        booking.subjectId = subject.id;
+      }
+    }
+
+    // Description
+    if (description !== undefined) {
+      if (description && description.length > 255) {
+        return res.status(400).json({ message: 'Description trop longue (255 max).' });
+      }
+      booking.description = description || null;
+    }
+
+    await booking.save(); // UPDATE dans MySQL
+    res.json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = { listBookings, createBooking, joinBooking, deleteBooking, updateBooking };

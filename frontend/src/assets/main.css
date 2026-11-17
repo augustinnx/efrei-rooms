@@ -179,3 +179,47 @@ input[type='password'] {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  text-decoration: none;
+  border: 1px solid #d1d5db;
+}
+
+/* Le campus affiché en ce moment */
+.tab.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Les salles : autant de colonnes que la largeur permet */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+
+.room-card {
+  text-align: center;
+}
+
+.room-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.room-card p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+}

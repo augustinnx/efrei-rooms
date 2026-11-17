@@ -11,7 +11,7 @@ const router = createRouter({
     { path: '/register', name: 'register', component: RegisterView },
     { path: '/login', name: 'login', component: LoginView },
     // meta.requiresAuth = true : cette page est réservée aux connectés
-    { path: '/campuses', name: 'campuses', component: CampusesView, meta: { requiresAuth: true } },
+    { path: '/campuses/:id?', name: 'campuses', component: CampusesView, meta: { requiresAuth: true } },
   ],
 })
 

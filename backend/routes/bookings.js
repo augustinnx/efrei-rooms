@@ -5,6 +5,7 @@ const {
   createBooking,
   joinBooking,
   deleteBooking,
+  updateBooking,
 } = require('../controllers/bookingController');
 const { requireAuth } = require('../middleware/auth');
 
@@ -31,6 +32,9 @@ router.post('/', requireAuth, bookingRules, createBooking);
 
 // POST /api/bookings/5/join  -> rejoindre la réservation 5
 router.post('/:id/join', requireAuth, joinBooking);
+
+// PUT /api/bookings/5  -> modifier la réservation 5 (créateur ou admin)
+router.put('/:id', requireAuth, updateBooking);
 
 // DELETE /api/bookings/5  -> supprimer la réservation 5 (créateur ou admin)
 router.delete('/:id', requireAuth, deleteBooking);
