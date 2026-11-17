@@ -1,22 +1,24 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import BookingModal from '../components/BookingModal.vue'
 
-const route = useRoute() // l'adresse de la page courante
+const route = useRoute()
 const campuses = ref([])
 const rooms = ref([])
 const error = ref('')
 
-// Le campus affiché : celui de l'adresse, sinon le premier de la liste
+// La salle sur laquelle on a cliqué (null = fenêtre fermée)
+const selectedRoom = ref(null)
+const message = ref('')
+
 const currentId = computed(() => {
   if (route.params.id) return Number(route.params.id)
   return campuses.value.length ? campuses.value[0].id : null
 })
 
-// Le campus complet (pour afficher son nom)
 const currentCampus = computed(() => campuses.value.find((c) => c.id === currentId.value))
 
-// Charge les salles du campus affiché
 async function loadRooms() {
   if (!currentId.value) return
   try {
@@ -28,7 +30,6 @@ async function loadRooms() {
   }
 }
 
-// Au chargement de la page : on récupère la liste des campus
 onMounted(async () => {
   try {
     const response = await fetch('http://localhost:3000/api/rooms/campuses')
@@ -39,13 +40,17 @@ onMounted(async () => {
   }
 })
 
-// Quand le campus affiché change, on recharge ses salles
 watch(currentId, loadRooms)
+
+// Appelée quand la fenêtre dit "réservation créée"
+function onCreated() {
+  selectedRoom.value = null
+  message.value = 'Réservation créée !'
+}
 </script>
 
 <template>
   <main class="container">
-    <!-- Menu pour passer d'un campus à l'autre -->
     <nav class="tabs" aria-label="Campus">
       <RouterLink
         v-for="campus in campuses"
@@ -60,13 +65,27 @@ watch(currentId, loadRooms)
 
     <h1 v-if="currentCampus">{{ currentCampus.name }}</h1>
 
+    <p v-if="message" class="success">{{ message }}</p>
     <p v-if="error" class="error">{{ error }}</p>
 
     <div v-else class="rooms-grid">
-      <div v-for="room in rooms" :key="room.id" class="card room-card">
+      <div
+        v-for="room in rooms"
+        :key="room.id"
+        class="card room-card clickable"
+        @click="selectedRoom = room; message = ''"
+      >
         <h2>{{ room.name }}</h2>
         <p>{{ room.capacity }} places</p>
       </div>
     </div>
+
+    <!-- La fenêtre de réservation, affichée seulement si une salle est choisie -->
+    <BookingModal
+      v-if="selectedRoom"
+      :room="selectedRoom"
+      @close="selectedRoom = null"
+      @created="onCreated"
+    />
   </main>
 </template>

@@ -1,4 +1,4 @@
-const { Campus, Room } = require('../models');
+const { Campus, Room, Subject } = require('../models');
 
 // ---------- LISTE DES CAMPUS ----------
 async function listCampuses(req, res) {
@@ -38,4 +38,15 @@ async function listRooms(req, res) {
   }
 }
 
-module.exports = { listCampuses, listRooms };
+// ---------- LISTE DES MATIÈRES ----------
+async function listSubjects(req, res) {
+  try {
+    const subjects = await Subject.findAll({ order: [['name', 'ASC']] });
+    res.json(subjects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = { listCampuses, listRooms, listSubjects };

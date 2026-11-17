@@ -223,3 +223,58 @@ input[type='password'] {
   margin: 0.25rem 0 0;
   font-size: 0.85rem;
 }
+
+.room-card.clickable {
+  cursor: pointer;
+}
+
+.room-card.clickable:hover {
+  outline: 2px solid var(--color-primary);
+}
+
+.success {
+  color: #15803d;
+  font-weight: 500;
+}
+
+input[type='number'],
+input[type='date'] {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius);
+}
+
+/* La fenêtre de réservation : un fond sombre et une carte au centre */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+
+.modal {
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h2 {
+  margin-top: 0;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-secondary-button {
+  background: white;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
