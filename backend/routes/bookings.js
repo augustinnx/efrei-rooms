@@ -6,6 +6,7 @@ const {
   joinBooking,
   deleteBooking,
   updateBooking,
+  listMyBookings,
 } = require('../controllers/bookingController');
 const { requireAuth } = require('../middleware/auth');
 
@@ -26,6 +27,9 @@ const bookingRules = [
 
 // GET /api/bookings  -> voir les réservations (connecté)
 router.get('/', requireAuth, listBookings);
+
+// GET /api/bookings/mine  -> mes réservations (créées et rejointes)
+router.get('/mine', requireAuth, listMyBookings);
 
 // POST /api/bookings  -> créer une réservation (connecté)
 router.post('/', requireAuth, bookingRules, createBooking);

@@ -278,3 +278,32 @@ input[type='date'] {
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
 }
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.topbar-nav .link-button {
+  margin-left: 1rem;
+}
+
+.booking-item {
+  margin-bottom: 1rem;
+}
+
+.booking-item p {
+  margin: 0.25rem 0;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-size: 0.8rem;
+}

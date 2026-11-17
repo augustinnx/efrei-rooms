@@ -308,4 +308,50 @@ async function updateBooking(req, res) {
   }
 }
 
-module.exports = { listBookings, createBooking, joinBooking, deleteBooking, updateBooking };
+// ---------- MES RÉSERVATIONS ----------
+// GET /api/bookings/mine : celles que j'ai créées + celles que j'ai rejointes (à venir)
+async function listMyBookings(req, res) {
+  try {
+    const today = toDateString(new Date());
+
+    // 1. Les réservations que j'ai créées
+    const created = await Booking.findAll({
+      where: {
+        creatorId: req.session.userId,
+        status: { [Op.ne]: 'cancelled' },
+        date: { [Op.gte]: today }, // seulement aujourd'hui et après
+      },
+      include: [
+        { model: Room, attributes: ['id', 'name'] },
+        { model: Subject, attributes: ['id', 'name'] },
+      ],
+      order: [['date', 'ASC'], ['startTime', 'ASC']],
+    });
+
+    // 2. Celles que j'ai rejointes (avec mon statut : accepté ou en attente)
+    const participations = await BookingParticipant.findAll({
+      where: { userId: req.session.userId },
+      include: [
+        {
+          model: Booking,
+          where: { status: { [Op.ne]: 'cancelled' }, date: { [Op.gte]: today } },
+          include: [
+            { model: Room, attributes: ['id', 'name'] },
+            { model: Subject, attributes: ['id', 'name'] },
+          ],
+        },
+      ],
+    });
+
+    const joined = participations
+      .map((p) => ({ ...p.Booking.toJSON(), myStatus: p.status }))
+      .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
+
+    res.json({ created, joined });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = { listBookings, createBooking, joinBooking, deleteBooking, updateBooking, listMyBookings };

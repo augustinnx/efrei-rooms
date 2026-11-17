@@ -21,9 +21,11 @@ async function logout() {
       <RouterLink to="/" class="brand">EFREI Rooms</RouterLink>
 
       <!-- Affiché seulement sur les pages réservées aux connectés -->
-      <button v-if="route.meta.requiresAuth" class="link-button" @click="logout">
-        Se déconnecter
-      </button>
+      <nav v-if="route.meta.requiresAuth" class="topbar-nav">
+        <RouterLink to="/campuses">Campus</RouterLink>
+        <RouterLink to="/my-bookings">Mes réservations</RouterLink>
+        <button class="link-button" @click="logout">Se déconnecter</button>
+      </nav>
     </div>
   </header>
 
