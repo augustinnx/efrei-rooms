@@ -417,3 +417,53 @@ input[type='date'] {
 .legend-box.closed {
   background: #e5e7eb;
 }
+
+/* Texte lu par les lecteurs d'écran, invisible à l'écran */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* Le tableau défile horizontalement sur un petit écran */
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-card);
+  border-radius: var(--radius);
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+/* Sélecteur d'attribut : cible les en-têtes de colonne */
+.data-table th[scope='col'] {
+  background: #eff6ff;
+  color: var(--color-primary);
+}
+
+/* Une ligne sur deux est légèrement grisée */
+.data-table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.data-table td button {
+  margin: 0 0.25rem 0 0;
+  padding: 0.3rem 0.7rem;
+}
+
+.edit-row td {
+  white-space: normal;
+}

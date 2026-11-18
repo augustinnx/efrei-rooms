@@ -47,6 +47,7 @@ async function removeBooking(booking) {
     error.value = data.message
     return
   }
+  error.value = ''
   message.value = 'Réservation supprimée.'
   await load()
 }
@@ -70,6 +71,7 @@ async function saveEdit(booking) {
     error.value = data.message
     return
   }
+  error.value = ''
   editingId.value = null
   message.value = 'Réservation modifiée.'
   await load()
@@ -86,52 +88,91 @@ async function saveEdit(booking) {
     <h2>Mes salles réservées</h2>
     <p v-if="created.length === 0">Aucune réservation à venir.</p>
 
-    <div v-for="b in created" :key="b.id" class="card booking-item">
-      <div>
-        <strong>Salle {{ b.Room.name }}</strong>
-        <span class="badge">{{ b.visibility === 'open' ? 'Groupe ouvert' : 'Groupe privé' }}</span>
-        <p>
-          {{ b.date }} de {{ b.startTime.slice(0, 5) }} à {{ b.endTime.slice(0, 5) }}
-          · {{ typeLabels[b.type] }}
-          <span v-if="b.Subject"> · {{ b.Subject.name }}</span>
-        </p>
-        <p v-if="b.description">{{ b.description }}</p>
-      </div>
+    <!-- Le conteneur permet de faire défiler le tableau sur un petit écran -->
+    <div v-else class="table-wrapper">
+      <table class="data-table">
+        <caption class="sr-only">Mes réservations à venir</caption>
+        <thead>
+          <tr>
+            <th scope="col">Salle</th>
+            <th scope="col">Jour</th>
+            <th scope="col">Horaires</th>
+            <th scope="col">Motif</th>
+            <th scope="col">Matière</th>
+            <th scope="col">Groupe</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Une ligne par réservation, plus une ligne de formulaire si on modifie -->
+          <template v-for="b in created" :key="b.id">
+            <tr>
+              <td>{{ b.Room.name }}</td>
+              <td>{{ b.date }}</td>
+              <td>{{ b.startTime.slice(0, 5) }} – {{ b.endTime.slice(0, 5) }}</td>
+              <td>{{ typeLabels[b.type] }}</td>
+              <td>{{ b.Subject ? b.Subject.name : '—' }}</td>
+              <td>
+                <span class="badge">{{ b.visibility === 'open' ? 'Ouvert' : 'Privé' }}</span>
+              </td>
+              <td>
+                <button type="button" @click="startEdit(b)">Modifier</button>
+                <button type="button" class="btn-secondary-button" @click="removeBooking(b)">Supprimer</button>
+              </td>
+            </tr>
 
-      <!-- Mini-formulaire de modification, affiché seulement pour la réservation choisie -->
-      <form v-if="editingId === b.id" @submit.prevent="saveEdit(b)">
-        <label :for="'desc' + b.id">Description</label>
-        <input :id="'desc' + b.id" type="text" maxlength="255" v-model="editForm.description" />
+            <!-- Ligne de modification, affichée seulement pour la réservation choisie -->
+            <tr v-if="editingId === b.id" class="edit-row">
+              <td colspan="7">
+                <form @submit.prevent="saveEdit(b)">
+                  <label :for="'desc' + b.id">Description</label>
+                  <input :id="'desc' + b.id" type="text" maxlength="255" v-model="editForm.description" />
 
-        <label :for="'vis' + b.id">Groupe</label>
-        <select :id="'vis' + b.id" v-model="editForm.visibility">
-          <option value="open">Ouvert</option>
-          <option value="closed">Privé</option>
-        </select>
+                  <label :for="'vis' + b.id">Groupe</label>
+                  <select :id="'vis' + b.id" v-model="editForm.visibility">
+                    <option value="open">Ouvert</option>
+                    <option value="closed">Privé</option>
+                  </select>
 
-        <div class="modal-buttons">
-          <button type="submit">Enregistrer</button>
-          <button type="button" class="btn-secondary-button" @click="editingId = null">Annuler</button>
-        </div>
-      </form>
-
-      <div v-else class="modal-buttons">
-        <button type="button" @click="startEdit(b)">Modifier</button>
-        <button type="button" class="btn-secondary-button" @click="removeBooking(b)">Supprimer</button>
-      </div>
+                  <div class="modal-buttons">
+                    <button type="submit">Enregistrer</button>
+                    <button type="button" class="btn-secondary-button" @click="editingId = null">Annuler</button>
+                  </div>
+                </form>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
     </div>
 
     <h2>Les groupes que j'ai rejoints</h2>
     <p v-if="joined.length === 0">Vous n'avez rejoint aucun groupe.</p>
 
-    <div v-for="b in joined" :key="b.id" class="card booking-item">
-      <strong>Salle {{ b.Room.name }}</strong>
-      <span class="badge">{{ statusLabels[b.myStatus] }}</span>
-      <p>
-        {{ b.date }} de {{ b.startTime.slice(0, 5) }} à {{ b.endTime.slice(0, 5) }}
-        · {{ typeLabels[b.type] }}
-        <span v-if="b.Subject"> · {{ b.Subject.name }}</span>
-      </p>
+    <div v-else class="table-wrapper">
+      <table class="data-table">
+        <caption class="sr-only">Les groupes que j'ai rejoints</caption>
+        <thead>
+          <tr>
+            <th scope="col">Salle</th>
+            <th scope="col">Jour</th>
+            <th scope="col">Horaires</th>
+            <th scope="col">Motif</th>
+            <th scope="col">Matière</th>
+            <th scope="col">Mon statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="b in joined" :key="b.id">
+            <td>{{ b.Room.name }}</td>
+            <td>{{ b.date }}</td>
+            <td>{{ b.startTime.slice(0, 5) }} – {{ b.endTime.slice(0, 5) }}</td>
+            <td>{{ typeLabels[b.type] }}</td>
+            <td>{{ b.Subject ? b.Subject.name : '—' }}</td>
+            <td><span class="badge">{{ statusLabels[b.myStatus] }}</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </main>
 </template>
