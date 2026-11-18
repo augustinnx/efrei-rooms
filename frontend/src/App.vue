@@ -18,7 +18,7 @@ async function logout() {
 <template>
   <header class="topbar">
     <div class="container topbar-inner">
-      <RouterLink :to="route.meta.requiresAuth ? '/dashboard' : '/'" class="brand">EFREI Rooms</RouterLink>
+      <RouterLink :to="route.meta.requiresAuth ? '/dashboard' : '/'" class="brand">EF'Rooms</RouterLink>
 
       <!-- Affiché seulement sur les pages réservées aux connectés -->
       <nav v-if="route.meta.requiresAuth" class="topbar-nav">
