@@ -3,10 +3,10 @@ import heroImage from '../assets/hero.svg'
 </script>
 
 <template>
-  <main>
+  <main class="page-bg container">
     <section class="hero container">
       <div class="hero-text">
-        <h1>EF'Room</h1>
+        <h1>EF'Rooms</h1>
         <p class="tagline">
           Trouve une salle libre, réserve-la et révise avec d'autres étudiants.
         </p>

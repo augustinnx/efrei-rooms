@@ -165,14 +165,6 @@ input[type='password'] {
   }
 }
 
-.link-button {
-  background: transparent;
-  border: 1px solid white;
-  color: white;
-  margin: 0;
-  padding: 0.3rem 0.8rem;
-}
-
 /* Écran à partir de 700px : deux colonnes. C'est LA règle responsive. */
 @media (min-width: 700px) {
   .grid {
@@ -487,4 +479,65 @@ input[type='date'] {
 .progress-bar {
   height: 100%;
   background: var(--color-primary);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
+  text-decoration: none;
+}
+
+.brand-logo {
+  height: 32px;
+  width: auto;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1rem;
+  padding: 0.4rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.welcome {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.welcome p {
+  max-width: 600px;
+  margin: 0.5rem auto 1.5rem;
+}
+
+.page-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.55;
+
+  background-image: url('./pantheon-verre.png');
+  background-repeat: no-repeat;
+  background-position: right -20vw top 12vh; /* horizontal, vertical */
+  background-size: auto 100%;
 }

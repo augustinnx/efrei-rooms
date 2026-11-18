@@ -71,14 +71,15 @@ async function join(booking) {
 </script>
 
 <template>
-  <main class="container">
-    <h1>Bienvenue sur EFREI Rooms</h1>
-    <p>
-      Réserve une salle sur ton campus, dis ce que tu veux réviser et rejoins les
-      groupes des autres étudiants.
-    </p>
-    <RouterLink to="/campuses" class="btn">Réserver une salle</RouterLink>
-
+    <main class="page-bg container">
+    <section class="welcome">
+        <h1>Bienvenue sur EF'Rooms</h1>
+        <p>
+        Réserve une salle sur ton campus, dis ce que tu veux réviser et rejoins les
+        groupes des autres étudiants pour travailler !
+        </p>
+        <RouterLink to="/campuses" class="btn">Je réserve une salle</RouterLink>
+    </section>
     <p v-if="message" class="success">{{ message }}</p>
     <p v-if="error" class="error">{{ error }}</p>
 
