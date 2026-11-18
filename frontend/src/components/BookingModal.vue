@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 
 // props = ce que le parent nous donne ; emit = ce qu'on lui renvoie
-const props = defineProps({ room: Object })
+const props = defineProps({ room: Object, initialDate: String, initialHour: Number })
 const emit = defineEmits(['close', 'created'])
 
 // Transforme une date en texte "AAAA-MM-JJ"
@@ -23,9 +23,9 @@ const startHours = Array.from({ length: 12 }, (_, i) => 8 + i)
 const endHours = Array.from({ length: 12 }, (_, i) => 9 + i)
 
 const form = ref({
-  date: minDate,
-  startHour: 9,
-  endHour: 11,
+    date: props.initialDate || minDate,
+  startHour: props.initialHour || 9,
+  endHour: (props.initialHour || 9) + 1,
   type: 'revision',
   subjectId: '',
   maxParticipants: 10,

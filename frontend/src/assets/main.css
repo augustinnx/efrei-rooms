@@ -307,3 +307,113 @@ input[type='date'] {
   color: #1e3a8a;
   font-size: 0.8rem;
 }
+
+.plan-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.plan-controls > div {
+  flex: 1;
+  min-width: 140px;
+}
+
+.plan {
+  width: 100%;
+  height: auto;
+}
+
+.corridor {
+  fill: #e5e7eb;
+}
+
+.corridor-label {
+  font-size: 14px;
+  text-anchor: middle;
+  fill: #6b7280;
+}
+
+.room {
+  cursor: pointer;
+}
+
+.room-rect {
+  fill: #ffffff;
+  stroke: #1f2937;
+  stroke-width: 2;
+  transition: fill 0.15s;
+}
+
+/* Salle libre : bleue au survol */
+.room.free:hover .room-rect {
+  fill: #bfdbfe;
+  stroke: var(--color-primary);
+}
+
+/* Groupe ouvert : grise mais cliquable */
+.room.open .room-rect {
+  fill: #d1d5db;
+}
+
+.room.open:hover .room-rect {
+  fill: #9ca3af;
+}
+
+/* Groupe privé : grise, non cliquable */
+.room.closed {
+  cursor: not-allowed;
+}
+
+.room.closed .room-rect {
+  fill: #e5e7eb;
+}
+
+.room-name {
+  font-size: 18px;
+  font-weight: bold;
+  text-anchor: middle;
+  fill: #1f2937;
+  pointer-events: none;
+}
+
+.room-info {
+  font-size: 13px;
+  text-anchor: middle;
+  fill: #374151;
+  pointer-events: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-box {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #1f2937;
+  display: inline-block;
+}
+
+.legend-box.free {
+  background: #ffffff;
+}
+
+.legend-box.open {
+  background: #d1d5db;
+}
+
+.legend-box.closed {
+  background: #e5e7eb;
+}
