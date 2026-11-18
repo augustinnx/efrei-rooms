@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 
 const bookings = ref([])
+const topSubjects = ref([])
+const teachers = ref([])
 const error = ref('')
 const message = ref('')
 
@@ -17,9 +19,26 @@ async function load() {
   }
 }
 
-onMounted(load)
+// Le classement des matières et la liste des profs
+async function loadExtras() {
+  try {
+    const stats = await fetch('http://localhost:3000/api/bookings/stats/subjects', {
+      credentials: 'include',
+    })
+    if (stats.ok) topSubjects.value = await stats.json()
 
-// Deux listes calculées à partir de la même source
+    const t = await fetch('http://localhost:3000/api/rooms/teachers')
+    if (t.ok) teachers.value = await t.json()
+  } catch (e) {
+    // ces deux sections sont facultatives : on ignore l'erreur
+  }
+}
+
+onMounted(() => {
+  load()
+  loadExtras()
+})
+
 const permanences = computed(() => bookings.value.filter((b) => b.type === 'permanence'))
 const groups = computed(() => bookings.value.filter((b) => b.type !== 'permanence' && !b.isMine))
 
@@ -34,7 +53,6 @@ function formatDate(date) {
   })
 }
 
-// Rejoindre un groupe
 async function join(booking) {
   message.value = ''
   error.value = ''
@@ -48,7 +66,7 @@ async function join(booking) {
     return
   }
   message.value = `Vous avez rejoint la salle ${booking.Room.name}.`
-  await load() // on recharge pour mettre à jour les places
+  await load()
 }
 </script>
 
@@ -90,6 +108,9 @@ async function join(booking) {
         · {{ typeLabels[b.type] }}
         <span v-if="b.Subject"> · {{ b.Subject.name }}</span>
       </p>
+      <div class="progress" aria-hidden="true">
+        <div class="progress-bar" :style="{ width: (b.taken / b.maxParticipants) * 100 + '%' }"></div>
+      </div>
       <p v-if="b.description">{{ b.description }}</p>
       <p>Créé par {{ b.creator.firstName }}</p>
 
@@ -97,6 +118,38 @@ async function join(booking) {
       <span v-else-if="b.myStatus" class="badge">Déjà rejoint</span>
       <span v-else-if="b.taken >= b.maxParticipants" class="badge">Complet</span>
       <button v-else type="button" @click="join(b)">Rejoindre</button>
+    </div>
+
+    <h2>Matières les plus réservées</h2>
+    <p v-if="topSubjects.length === 0">Pas encore de statistiques.</p>
+    <ol v-else class="top-list">
+      <li v-for="s in topSubjects" :key="s.id">
+        <span>{{ s.name }}</span>
+        <span class="badge">{{ s.total }} réservation(s)</span>
+      </li>
+    </ol>
+
+    <h2>Contacter un professeur</h2>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <caption class="sr-only">Liste des professeurs</caption>
+        <thead>
+          <tr>
+            <th scope="col">Professeur</th>
+            <th scope="col">Matière</th>
+            <th scope="col">Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="t in teachers" :key="t.id">
+            <td>{{ t.name }}</td>
+            <td>{{ t.Subject.name }}</td>
+            <td>
+              <a :href="`mailto:${t.email}?subject=Question%20sur%20${t.Subject.name}`">Envoyer un email</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </main>
 </template>

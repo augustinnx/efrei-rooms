@@ -1,4 +1,4 @@
-const { Campus, Room, Subject } = require('../models');
+const { Campus, Room, Subject, Teacher } = require('../models');
 
 // ---------- LISTE DES CAMPUS ----------
 async function listCampuses(req, res) {
@@ -49,4 +49,18 @@ async function listSubjects(req, res) {
   }
 }
 
-module.exports = { listCampuses, listRooms, listSubjects };
+// ---------- LISTE DES PROFS ----------
+async function listTeachers(req, res) {
+  try {
+    const teachers = await Teacher.findAll({
+      include: [{ model: Subject, attributes: ['id', 'name'] }],
+      order: [['name', 'ASC']],
+    });
+    res.json(teachers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = { listCampuses, listRooms, listSubjects, listTeachers };

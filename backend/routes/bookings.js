@@ -8,6 +8,7 @@ const {
   updateBooking,
   listMyBookings,
   listUpcoming,
+  topSubjects,
 } = require('../controllers/bookingController');
 const { requireAuth } = require('../middleware/auth');
 
@@ -26,13 +27,17 @@ const bookingRules = [
   body('description').optional({ nullable: true }).isLength({ max: 255 }).withMessage('Description trop longue (255 max).'),
 ];
 
-// GET /api/bookings  -> voir les réservations (connecté)
+// GET /api/bookings  -> voir les réservations d'un jour (connecté)
 router.get('/', requireAuth, listBookings);
 
 // GET /api/bookings/mine  -> mes réservations (créées et rejointes)
 router.get('/mine', requireAuth, listMyBookings);
+
 // GET /api/bookings/upcoming  -> ce qui se passe cette semaine (page d'accueil)
 router.get('/upcoming', requireAuth, listUpcoming);
+
+// GET /api/bookings/stats/subjects  -> les matières les plus réservées
+router.get('/stats/subjects', requireAuth, topSubjects);
 
 // POST /api/bookings  -> créer une réservation (connecté)
 router.post('/', requireAuth, bookingRules, createBooking);

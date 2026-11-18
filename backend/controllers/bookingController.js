@@ -1,7 +1,6 @@
-const { Op } = require('sequelize');
+const { Op, QueryTypes } = require('sequelize');
 const { validationResult } = require('express-validator');
-const { Booking, BookingParticipant, Campus, Room, Subject, User } = require('../models');
-// Transforme une date JavaScript en texte "AAAA-MM-JJ"
+const { sequelize, Booking, BookingParticipant, Campus, Room, Subject, User } = require('../models');// Transforme une date JavaScript en texte "AAAA-MM-JJ"
 function toDateString(d) {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -405,6 +404,27 @@ async function listUpcoming(req, res) {
   }
 }
 
+// ---------- MATIÈRES LES PLUS RÉSERVÉES ----------
+// GET /api/bookings/stats/subjects : requête SQL écrite à la main avec GROUP BY
+async function topSubjects(req, res) {
+  try {
+    const rows = await sequelize.query(
+      `SELECT s.id, s.name, COUNT(b.id) AS total
+         FROM Bookings b
+         JOIN Subjects s ON s.id = b.subjectId
+        WHERE b.status <> 'cancelled'
+        GROUP BY s.id, s.name
+        ORDER BY total DESC
+        LIMIT 5`,
+      { type: QueryTypes.SELECT }
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
 module.exports = {
   listBookings,
   createBooking,
@@ -413,4 +433,5 @@ module.exports = {
   updateBooking,
   listMyBookings,
   listUpcoming,
+  topSubjects,
 };
