@@ -21,7 +21,7 @@ const bookingRules = [
   body('startTime').matches(/^([01]\d|2[0-3]):00$/).withMessage('Heure de début invalide (heure pleine, ex : 09:00).'),
   body('endTime').matches(/^([01]\d|2[0-3]):00$/).withMessage('Heure de fin invalide (heure pleine, ex : 11:00).'),
   body('type').isIn(['revision', 'chill', 'projet', 'permanence']).withMessage('Type invalide.'),
-  body('visibility').isIn(['open', 'closed']).withMessage('Visibilité invalide.'),
+  body('visibility').equals('open').withMessage('Les groupes sont ouverts à tous.'),
   body('maxParticipants').isInt({ min: 1, max: 40 }).withMessage('Le nombre de places doit être entre 1 et 40.'),
   body('subjectId').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Matière invalide.'),
   body('description').optional({ nullable: true }).isLength({ max: 255 }).withMessage('Description trop longue (255 max).'),

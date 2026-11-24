@@ -1,6 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { register, login, logout, me } = require('../controllers/authController');
+const { register, login, logout, me, activatePremium } = require('../controllers/authController');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -38,5 +38,8 @@ router.post('/logout', logout);
 
 // GET /api/auth/me  -> qui est connecté ? (route PROTÉGÉE par requireAuth)
 router.get('/me', requireAuth, me);
+
+// POST /api/auth/premium -> activer l'abonnement de démonstration
+router.post('/premium', requireAuth, activatePremium);
 
 module.exports = router;

@@ -7,6 +7,19 @@ function toDateString(d) {
   return `${d.getFullYear()}-${month}-${day}`;
 }
 
+function currentWeekRange() {
+  const now = new Date();
+  const daysSinceMonday = (now.getDay() + 6) % 7;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceMonday);
+  const nextMonday = new Date(monday);
+  nextMonday.setDate(nextMonday.getDate() + 7);
+
+  return {
+    start: toDateString(monday),
+    nextStart: toDateString(nextMonday),
+  };
+}
+
 // ---------- LISTE DES RÉSERVATIONS ----------
 // GET /api/bookings?campusId=1&date=2026-11-17
 async function listBookings(req, res) {
@@ -110,35 +123,67 @@ async function createBooking(req, res) {
       }
     }
 
-    // 8. DÉTECTION DE CONFLIT : y a-t-il déjà une réservation qui chevauche ?
-    const conflict = await Booking.findOne({
-      where: {
+    // Verrouiller le compte rend le contrôle de quota atomique pour deux demandes simultanées.
+    const result = await sequelize.transaction(async (transaction) => {
+      const user = await User.findByPk(req.session.userId, {
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      if (!user) {
+        return { status: 401, message: 'Utilisateur introuvable.' };
+      }
+
+      const { start: weekStart, nextStart: nextWeekStart } = currentWeekRange();
+      const weeklyBookings = await Booking.count({
+        where: {
+          creatorId: user.id,
+          createdAt: {
+            [Op.gte]: new Date(`${weekStart}T00:00:00`),
+            [Op.lt]: new Date(`${nextWeekStart}T00:00:00`),
+          },
+        },
+        transaction,
+      });
+      if (!user.isPremium && weeklyBookings >= 1) {
+        return {
+          status: 403,
+          message: 'Votre réservation gratuite de la semaine est déjà utilisée. Passez Pro pour réserver sans limite.',
+        };
+      }
+
+      const conflict = await Booking.findOne({
+        where: {
+          roomId,
+          date,
+          status: { [Op.ne]: 'cancelled' },
+          startTime: { [Op.lt]: `${endTime}:00` },
+          endTime: { [Op.gt]: `${startTime}:00` },
+        },
+        transaction,
+      });
+      if (conflict) {
+        return { status: 409, message: 'Cette salle est déjà réservée sur ce créneau.' };
+      }
+
+      const booking = await Booking.create({
         roomId,
+        creatorId: user.id,
+        subjectId: subjectId || null,
+        type,
+        visibility: 'open',
+        maxParticipants: Math.min(maxParticipants, room.capacity),
         date,
-        status: { [Op.ne]: 'cancelled' },
-        startTime: { [Op.lt]: `${endTime}:00` }, // elle commence avant ma fin...
-        endTime: { [Op.gt]: `${startTime}:00` }, // ...et finit après mon début
-      },
+        startTime: `${startTime}:00`,
+        endTime: `${endTime}:00`,
+        description: description || null,
+      }, { transaction });
+      return { booking };
     });
-    if (conflict) {
-      return res.status(409).json({ message: 'Cette salle est déjà réservée sur ce créneau.' });
+
+    if (result.status) {
+      return res.status(result.status).json({ message: result.message });
     }
-
-    // 9. Tout est bon : on crée la réservation
-    const booking = await Booking.create({
-      roomId,
-      creatorId: req.session.userId, // le créateur est l'utilisateur connecté
-      subjectId: subjectId || null,
-      type,
-      visibility,
-      maxParticipants: Math.min(maxParticipants, room.capacity), // jamais plus que la salle
-      date,
-      startTime: `${startTime}:00`,
-      endTime: `${endTime}:00`,
-      description: description || null,
-    });
-
-    res.status(201).json(booking);
+    res.status(201).json(result.booking);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -186,12 +231,10 @@ async function joinBooking(req, res) {
       return res.status(409).json({ message: 'Cette réservation est complète.' });
     }
 
-    // 6. Groupe ouvert : accepté tout de suite. Groupe fermé : en attente du créateur.
-    const status = booking.visibility === 'open' ? 'accepted' : 'pending';
     const participant = await BookingParticipant.create({
       bookingId,
       userId: req.session.userId,
-      status,
+      status: 'accepted',
     });
 
     res.status(201).json(participant);
@@ -220,8 +263,9 @@ async function deleteBooking(req, res) {
       return res.status(403).json({ message: "Vous ne pouvez supprimer que vos propres réservations." });
     }
 
-    // Les participants sont supprimés automatiquement (ON DELETE CASCADE)
-    await booking.destroy();
+    // Garder la réservation annulée pour qu'elle reste comptabilisée dans le quota hebdomadaire.
+    booking.status = 'cancelled';
+    await booking.save();
 
     res.json({ message: 'Réservation supprimée.' });
   } catch (error) {
@@ -255,7 +299,7 @@ async function updateBooking(req, res) {
 
     // Visibilité
     if (visibility !== undefined) {
-      if (!['open', 'closed'].includes(visibility)) {
+      if (visibility !== 'open') {
         return res.status(400).json({ message: 'Visibilité invalide.' });
       }
       booking.visibility = visibility;
@@ -311,6 +355,22 @@ async function updateBooking(req, res) {
 async function listMyBookings(req, res) {
   try {
     const today = toDateString(new Date());
+    const { start: weekStart, nextStart: nextWeekStart } = currentWeekRange();
+    const [user, weeklyBookings] = await Promise.all([
+      User.findByPk(req.session.userId, { attributes: ['isPremium'] }),
+      Booking.count({
+        where: {
+          creatorId: req.session.userId,
+          createdAt: {
+            [Op.gte]: new Date(`${weekStart}T00:00:00`),
+            [Op.lt]: new Date(`${nextWeekStart}T00:00:00`),
+          },
+        },
+      }),
+    ]);
+    if (!user) {
+      return res.status(401).json({ message: 'Utilisateur introuvable.' });
+    }
 
     // 1. Les réservations que j'ai créées
     const created = await Booking.findAll({
@@ -345,7 +405,17 @@ async function listMyBookings(req, res) {
       .map((p) => ({ ...p.Booking.toJSON(), myStatus: p.status }))
       .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
 
-    res.json({ created, joined });
+    res.json({
+      created,
+      joined,
+      reservationQuota: {
+        isPremium: user.isPremium,
+        used: weeklyBookings,
+        limit: user.isPremium ? null : 1,
+        remaining: user.isPremium ? null : Math.max(0, 1 - weeklyBookings),
+        weekStartsAt: weekStart,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur.' });

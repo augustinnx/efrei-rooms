@@ -3,12 +3,13 @@ import { ref, onMounted } from 'vue'
 
 const created = ref([])
 const joined = ref([])
+const quota = ref(null)
 const error = ref('')
 const message = ref('')
 
 // La réservation en cours de modification (null = aucune) et ses champs
 const editingId = ref(null)
-const editForm = ref({ description: '', visibility: 'open' })
+const editForm = ref({ description: '' })
 
 const typeLabels = {
   revision: 'Révision',
@@ -28,6 +29,7 @@ async function load() {
     const data = await response.json()
     created.value = data.created
     joined.value = data.joined
+    quota.value = data.reservationQuota
   } catch (e) {
     error.value = 'Impossible de charger vos réservations.'
   }
@@ -55,7 +57,7 @@ async function removeBooking(booking) {
 // Ouvre le mini-formulaire de modification
 function startEdit(booking) {
   editingId.value = booking.id
-  editForm.value = { description: booking.description || '', visibility: booking.visibility }
+  editForm.value = { description: booking.description || '' }
 }
 
 // PUT : enregistrer les modifications
@@ -84,6 +86,17 @@ async function saveEdit(booking) {
 
     <p v-if="message" class="success">{{ message }}</p>
     <p v-if="error" class="error">{{ error }}</p>
+    <section class="subscription-summary card">
+      <div>
+        <strong>{{ quota && quota.isPremium ? 'Offre Pro active' : 'Offre gratuite' }}</strong>
+        <p v-if="quota && !quota.isPremium">
+          {{ quota.remaining }} réservation de salle restante cette semaine
+          (renouvellement le {{ quota.weekStartsAt }}).
+        </p>
+        <p v-else-if="quota">Réservations de salles illimitées. Les groupes restent accessibles à tous.</p>
+      </div>
+      <RouterLink to="/plans" class="btn">{{ quota && quota.isPremium ? 'Mon abonnement' : 'Passer Pro' }}</RouterLink>
+    </section>
 
     <h2>Mes salles réservées</h2>
     <p v-if="created.length === 0">Aucune réservation à venir.</p>
@@ -113,7 +126,7 @@ async function saveEdit(booking) {
               <td>{{ typeLabels[b.type] }}</td>
               <td>{{ b.Subject ? b.Subject.name : '—' }}</td>
               <td>
-                <span class="badge">{{ b.visibility === 'open' ? 'Ouvert' : 'Privé' }}</span>
+                <span class="badge">Ouvert</span>
               </td>
               <td>
                 <button type="button" @click="startEdit(b)">Modifier</button>
@@ -127,12 +140,6 @@ async function saveEdit(booking) {
                 <form @submit.prevent="saveEdit(b)">
                   <label :for="'desc' + b.id">Description</label>
                   <input :id="'desc' + b.id" type="text" maxlength="255" v-model="editForm.description" />
-
-                  <label :for="'vis' + b.id">Groupe</label>
-                  <select :id="'vis' + b.id" v-model="editForm.visibility">
-                    <option value="open">Ouvert</option>
-                    <option value="closed">Privé</option>
-                  </select>
 
                   <div class="modal-buttons">
                     <button type="submit">Enregistrer</button>

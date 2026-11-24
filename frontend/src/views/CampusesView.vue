@@ -116,10 +116,10 @@ const layout = computed(() => {
   })
 })
 
-// L'état d'une salle : free (libre), open (groupe ouvert) ou closed (groupe privé)
+// Les réservations de groupe restent visibles dans leur couleur dédiée.
 function stateOf(item) {
   if (!item.booking) return 'free'
-  return item.booking.visibility === 'open' ? 'open' : 'closed'
+  return item.booking.type === 'permanence' ? 'unavailable' : 'open'
 }
 
 // Coupe les textes trop longs pour qu'ils tiennent dans la salle
@@ -132,10 +132,9 @@ function onRoomClick(item) {
   error.value = ''
   if (!item.booking) {
     selectedRoom.value = item.room // salle libre : on ouvre le formulaire
-  } else if (item.booking.visibility === 'open') {
+  } else if (item.booking.type !== 'permanence') {
     join(item.booking) // groupe ouvert : on le rejoint
   }
-  // groupe privé : rien ne se passe
 }
 
 async function join(booking) {
@@ -219,18 +218,13 @@ function onCreated() {
           </text>
         </template>
 
-        <!-- Cadenas rouge pour un groupe privé -->
-        <g v-if="stateOf(item) === 'closed'" :transform="`translate(${item.x + item.w / 2 - 9}, ${item.y + 92})`">
-          <path d="M4 8 V5 a5 5 0 0 1 10 0 V8" fill="none" stroke="#b91c1c" stroke-width="2" />
-          <rect x="1" y="8" width="16" height="12" rx="2" fill="#b91c1c" />
-        </g>
       </g>
     </svg>
 
     <div class="legend">
-      <span class="legend-item"><span class="legend-box free"></span> Libre</span>
+      <span class="legend-item"><span class="legend-box free"></span> Disponible</span>
       <span class="legend-item"><span class="legend-box open"></span> Groupe ouvert : cliquer pour rejoindre</span>
-      <span class="legend-item"><span class="legend-box closed"></span> Groupe privé (cadenas)</span>
+      <span class="legend-item"><span class="legend-box busy"></span> Indisponible</span>
     </div>
 
     <!-- La fenêtre de réservation, affichée seulement si une salle est choisie -->

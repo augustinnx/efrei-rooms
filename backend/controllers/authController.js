@@ -43,6 +43,7 @@ async function register(req, res) {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
+      isPremium: user.isPremium,
     });
   } catch (error) {
     console.error(error);
@@ -81,6 +82,7 @@ async function login(req, res) {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
+      isPremium: user.isPremium,
     });
   } catch (error) {
     console.error(error);
@@ -102,7 +104,7 @@ function logout(req, res) {
 async function me(req, res) {
   try {
     const user = await User.findByPk(req.session.userId, {
-      attributes: ['id', 'firstName', 'lastName', 'email', 'role' ], // pas de passwordHash
+      attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'isPremium'], // pas de passwordHash
     });
     if (!user) {
       return res.status(401).json({ message: 'Utilisateur introuvable.' });
@@ -114,4 +116,21 @@ async function me(req, res) {
   }
 }
 
-module.exports = { register, login, logout, me };
+// ---------- SOUSCRIPTION PRO SIMULÉE ----------
+async function activatePremium(req, res) {
+  try {
+    const user = await User.findByPk(req.session.userId);
+    if (!user) {
+      return res.status(401).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    user.isPremium = true;
+    await user.save();
+    res.json({ isPremium: user.isPremium });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+}
+
+module.exports = { register, login, logout, me, activatePremium };

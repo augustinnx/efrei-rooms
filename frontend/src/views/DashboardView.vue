@@ -115,8 +115,7 @@ async function join(booking) {
       <p v-if="b.description">{{ b.description }}</p>
       <p>Créé par {{ b.creator.firstName }}</p>
 
-      <span v-if="b.visibility === 'closed'" class="badge">Groupe privé</span>
-      <span v-else-if="b.myStatus" class="badge">Déjà rejoint</span>
+      <span v-if="b.myStatus" class="badge">Déjà rejoint</span>
       <span v-else-if="b.taken >= b.maxParticipants" class="badge">Complet</span>
       <button v-else type="button" @click="join(b)">Rejoindre</button>
     </div>

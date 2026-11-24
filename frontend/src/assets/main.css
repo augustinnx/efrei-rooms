@@ -251,7 +251,7 @@ input[type='date'] {
 
 .modal {
   width: 100%;
-  max-width: 460px;
+  max-width: 620px;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -353,13 +353,13 @@ input[type='date'] {
   fill: #9ca3af;
 }
 
-/* Groupe privé : grise, non cliquable */
-.room.closed {
+/* Créneaux occupés hors groupe */
+.room.unavailable {
   cursor: not-allowed;
 }
 
-.room.closed .room-rect {
-  fill: #e5e7eb;
+.room.unavailable .room-rect {
+  fill: #fecaca;
 }
 
 .room-name {
@@ -406,8 +406,217 @@ input[type='date'] {
   background: #d1d5db;
 }
 
-.legend-box.closed {
-  background: #e5e7eb;
+.legend-box.busy {
+  background: #fecaca;
+}
+
+.availability {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius);
+}
+
+.availability legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.availability-help {
+  margin: 0 0 0.6rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.availability-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.availability-slot,
+.duration-options button {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--color-text);
+  padding: 0.45rem 0.25rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.availability-slot.is-available:hover,
+.availability-slot.is-selected {
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.availability-slot.is-group,
+.legend-box.open {
+  background: #d1d5db;
+}
+
+.availability-slot.is-unavailable,
+.legend-box.busy {
+  background: #fecaca;
+}
+
+.availability-slot.is-past {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.availability-slot:disabled {
+  cursor: not-allowed;
+}
+
+.availability-legend {
+  gap: 0.6rem 1rem;
+  font-size: 0.8rem;
+}
+
+.duration-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.35rem 0 1rem;
+}
+
+.duration-options .duration-selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.subscription-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+
+.subscription-summary p {
+  margin: 0.25rem 0 0;
+}
+
+.plans-page {
+  max-width: 850px;
+}
+
+.back-link {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.plans-heading {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.plans-heading h1 {
+  margin: 0.25rem 0;
+}
+
+.plans-eyebrow,
+.plan-label {
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 330px;
+  padding: 1.5rem;
+}
+
+.plan-card h2 {
+  margin: 0.6rem 0 0;
+}
+
+.plan-price {
+  margin: 0.5rem 0 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.plan-price span {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+.plan-card ul {
+  padding-left: 1.25rem;
+}
+
+.plan-card li {
+  margin: 0.65rem 0;
+}
+
+.plan-current {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.plan-card-pro {
+  border: 2px solid var(--color-primary);
+}
+
+.plan-ribbon {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0 0 6px 6px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.8rem;
+}
+
+.plan-cta {
+  width: 100%;
+}
+
+.plan-cta:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.plans-disclaimer {
+  margin: 1.5rem 0;
+  color: #6b7280;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+@media (min-width: 700px) {
+  .plans-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 460px) {
+  .availability-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .subscription-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 /* Texte lu par les lecteurs d'écran, invisible à l'écran */
