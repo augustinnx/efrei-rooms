@@ -208,14 +208,11 @@ Toutes les routes `/api/bookings` et `/api/auth/me` exigent d'être connecté.
 
 check list et idées a rajouter :
 
-- bouton déconnexion a remplacer par un logo plus joli (lucide.dev)
-- mieux remplir le bandeau bleu sur la page principale.
-- rajouter une photo de l'EFREI sur la page principale ?
-- logo de l'EFREI manquant
+
+
+
 - logo insta/linkedin/mail sur le footer pour nous contacter (donc peut etre enlever le 'contactez nous')
-- le bouton campus sur le bandeau a changer, par un bouton Accueil qui renvoie sur la page princiaple après connexin. Cette page comprendra des cartes avec les permannces de la semaine, les reservations de la journée.
-- plan 2D des batiments
-- changer le logo visible sur la page web + le titre
+
 
 
 
