@@ -541,3 +541,60 @@ input[type='date'] {
   background-position: right -20vw top 12vh; /* horizontal, vertical */
   background-size: auto 100%;
 }
+
+.page-end {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.progress {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+}
+
+/* Les cartes horizontales des profs */
+.teachers-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.teacher-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.teacher-photo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.teacher-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dbeafe;
+  color: var(--color-primary);
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.teacher-info h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.teacher-info p {
+  margin: 0.25rem 0 0.75rem;
+}

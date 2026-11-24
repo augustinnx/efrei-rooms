@@ -129,28 +129,10 @@ async function join(booking) {
         <span class="badge">{{ s.total }} réservation(s)</span>
       </li>
     </ol>
-
-    <h2>Contacter un professeur</h2>
-    <div class="table-wrapper">
-      <table class="data-table">
-        <caption class="sr-only">Liste des professeurs</caption>
-        <thead>
-          <tr>
-            <th scope="col">Professeur</th>
-            <th scope="col">Matière</th>
-            <th scope="col">Contact</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="t in teachers" :key="t.id">
-            <td>{{ t.name }}</td>
-            <td>{{ t.Subject.name }}</td>
-            <td>
-              <a :href="`mailto:${t.email}?subject=Question%20sur%20${t.Subject.name}`">Envoyer un email</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <!-- Le bouton en bas de page qui mène à la liste des profs -->
+    <div class="page-end">
+      <RouterLink to="/teachers" class="btn">Contacter un professeur</RouterLink>
     </div>
+
   </main>
 </template>
