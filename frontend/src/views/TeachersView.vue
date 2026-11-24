@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import emailLogo from '@/assets/mail.svg'
 
 const teachers = ref([])
 const error = ref('')
@@ -52,11 +53,8 @@ function initials(name) {
         <div class="teacher-info">
           <h2>{{ t.name }}</h2>
           <p>{{ t.Subject.name }}</p>
-          <a
-            class="btn"
-            :href="`mailto:${t.email}?subject=Question%20sur%20${encodeURIComponent(t.Subject.name)}`"
-          >
-            Contacter par email
+          <a class="email-link" :href="`mailto:${t.email}?subject=Question%20sur%20${encodeURIComponent(t.Subject.name)}`" :title="`Contacter ${t.name} par email`" :aria-label="`Contacter ${t.name} par email`">
+            <img :src="emailLogo" alt="" class="email-logo" />
           </a>
         </div>
       </article>
