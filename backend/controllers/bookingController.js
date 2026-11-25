@@ -7,6 +7,16 @@ function toDateString(d) {
   return `${d.getFullYear()}-${month}-${day}`;
 }
 
+function isValidDateString(date) {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsed = new Date(`${date}T12:00:00`);
+  return !Number.isNaN(parsed.getTime()) && toDateString(parsed) === date;
+}
+
+function isPremiumActive(user) {
+  return user.isPremium && (!user.premiumUntil || user.premiumUntil >= toDateString(new Date()));
+}
+
 function currentWeekRange() {
   const now = new Date();
   const daysSinceMonday = (now.getDay() + 6) % 7;
@@ -144,7 +154,7 @@ async function createBooking(req, res) {
         },
         transaction,
       });
-      if (!user.isPremium && weeklyBookings >= 1) {
+      if (!isPremiumActive(user) && weeklyBookings >= 1) {
         return {
           status: 403,
           message: 'Your free weekly room booking has already been used. Upgrade to Pro to book without limits.',
@@ -244,6 +254,38 @@ async function joinBooking(req, res) {
   }
 }
 
+// ---------- QUITTER UN GROUPE REJOINT ----------
+// DELETE /api/bookings/:id/leave
+async function leaveBooking(req, res) {
+  try {
+    const bookingId = parseInt(req.params.id, 10);
+    if (Number.isNaN(bookingId)) {
+      return res.status(400).json({ message: 'Invalid identifier.' });
+    }
+
+    const booking = await Booking.findByPk(bookingId);
+    if (!booking || booking.status === 'cancelled') {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+    if (booking.creatorId === req.session.userId) {
+      return res.status(400).json({ message: 'As the creator, you cannot leave your own booking.' });
+    }
+
+    const participant = await BookingParticipant.findOne({
+      where: { bookingId, userId: req.session.userId },
+    });
+    if (!participant) {
+      return res.status(404).json({ message: 'You have not joined this group.' });
+    }
+
+    await participant.destroy();
+    res.json({ message: 'You left the group.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+}
+
 // ---------- SUPPRIMER UNE RÉSERVATION ----------
 // DELETE /api/bookings/:id
 async function deleteBooking(req, res) {
@@ -295,7 +337,71 @@ async function updateBooking(req, res) {
       return res.status(403).json({ message: 'You can only edit your own bookings.' });
     }
 
-    const { description, visibility, maxParticipants, subjectId } = req.body;
+    const { description, visibility, maxParticipants, subjectId, date, startTime, endTime } = req.body || {};
+
+    if (date !== undefined || startTime !== undefined || endTime !== undefined) {
+      const nextDate = date === undefined ? booking.date : date;
+      const nextStartTime = startTime === undefined ? booking.startTime.slice(0, 5) : startTime;
+      const nextEndTime = endTime === undefined ? booking.endTime.slice(0, 5) : endTime;
+
+      if (!isValidDateString(nextDate)) {
+        return res.status(400).json({ message: 'Invalid date (YYYY-MM-DD format).' });
+      }
+      if (
+        typeof nextStartTime !== 'string' ||
+        !/^([01]\d|2[0-3]):00$/.test(nextStartTime) ||
+        typeof nextEndTime !== 'string' ||
+        !/^([01]\d|2[0-3]):00$/.test(nextEndTime)
+      ) {
+        return res.status(400).json({ message: 'Invalid time (use full hours, e.g. 09:00).' });
+      }
+
+      const start = parseInt(nextStartTime.slice(0, 2), 10);
+      const end = parseInt(nextEndTime.slice(0, 2), 10);
+      if (start >= end) {
+        return res.status(400).json({ message: 'End time must be after start time.' });
+      }
+      if (start < 8 || end > 20) {
+        return res.status(400).json({ message: 'Rooms are open from 8 AM to 8 PM.' });
+      }
+
+      const dayOfWeek = new Date(`${nextDate}T12:00:00`).getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        return res.status(400).json({ message: 'Bookings are available Monday through Friday.' });
+      }
+
+      const now = new Date();
+      const today = toDateString(now);
+      if (nextDate < today) {
+        return res.status(400).json({ message: 'Cannot book in the past.' });
+      }
+      if (nextDate === today && start <= now.getHours()) {
+        return res.status(400).json({ message: 'This time slot has already started.' });
+      }
+      const dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() + 7);
+      if (nextDate > toDateString(dateLimit)) {
+        return res.status(400).json({ message: 'Bookings can be made up to 7 days in advance.' });
+      }
+
+      const conflict = await Booking.findOne({
+        where: {
+          id: { [Op.ne]: bookingId },
+          roomId: booking.roomId,
+          date: nextDate,
+          status: { [Op.ne]: 'cancelled' },
+          startTime: { [Op.lt]: `${nextEndTime}:00` },
+          endTime: { [Op.gt]: `${nextStartTime}:00` },
+        },
+      });
+      if (conflict) {
+        return res.status(409).json({ message: 'This room is already booked for this time slot.' });
+      }
+
+      booking.date = nextDate;
+      booking.startTime = `${nextStartTime}:00`;
+      booking.endTime = `${nextEndTime}:00`;
+    }
 
     // Visibilité
     if (visibility !== undefined) {
@@ -357,7 +463,7 @@ async function listMyBookings(req, res) {
     const today = toDateString(new Date());
     const { start: weekStart, nextStart: nextWeekStart } = currentWeekRange();
     const [user, weeklyBookings] = await Promise.all([
-      User.findByPk(req.session.userId, { attributes: ['isPremium'] }),
+      User.findByPk(req.session.userId, { attributes: ['isPremium', 'premiumPlan', 'premiumUntil'] }),
       Booking.count({
         where: {
           creatorId: req.session.userId,
@@ -405,14 +511,17 @@ async function listMyBookings(req, res) {
       .map((p) => ({ ...p.Booking.toJSON(), myStatus: p.status }))
       .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
 
+    const premiumActive = isPremiumActive(user);
     res.json({
       created,
       joined,
       reservationQuota: {
-        isPremium: user.isPremium,
+        isPremium: premiumActive,
+        plan: premiumActive ? user.premiumPlan : null,
+        premiumUntil: premiumActive ? user.premiumUntil : null,
         used: weeklyBookings,
-        limit: user.isPremium ? null : 1,
-        remaining: user.isPremium ? null : Math.max(0, 1 - weeklyBookings),
+        limit: premiumActive ? null : 1,
+        remaining: premiumActive ? null : Math.max(0, 1 - weeklyBookings),
         weekStartsAt: weekStart,
       },
     });
@@ -499,6 +608,7 @@ module.exports = {
   listBookings,
   createBooking,
   joinBooking,
+  leaveBooking,
   deleteBooking,
   updateBooking,
   listMyBookings,

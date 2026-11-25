@@ -4,6 +4,7 @@ const {
   listBookings,
   createBooking,
   joinBooking,
+  leaveBooking,
   deleteBooking,
   updateBooking,
   listMyBookings,
@@ -44,6 +45,9 @@ router.post('/', requireAuth, bookingRules, createBooking);
 
 // POST /api/bookings/5/join  -> rejoindre la réservation 5
 router.post('/:id/join', requireAuth, joinBooking);
+
+// DELETE /api/bookings/5/leave -> quitter un groupe rejoint
+router.delete('/:id/leave', requireAuth, leaveBooking);
 
 // PUT /api/bookings/5  -> modifier la réservation 5 (créateur ou admin)
 router.put('/:id', requireAuth, updateBooking);

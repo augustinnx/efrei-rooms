@@ -2,6 +2,40 @@ const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const { User } = require('../models');
 
+function dateString(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function isPremiumActive(user) {
+  return user.isPremium && (!user.premiumUntil || user.premiumUntil >= dateString(new Date()));
+}
+
+function publicUser(user) {
+  const premiumActive = isPremiumActive(user);
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+    isPremium: premiumActive,
+    premiumPlan: premiumActive ? user.premiumPlan : null,
+    premiumUntil: premiumActive ? user.premiumUntil : null,
+  };
+}
+
+function addMonthsClamped(date, months) {
+  const result = new Date(date);
+  const originalDay = result.getDate();
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+  const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+  result.setDate(Math.min(originalDay, lastDay));
+  return result;
+}
+
 // ---------- INSCRIPTION ----------
 async function register(req, res) {
   try {
@@ -37,14 +71,7 @@ async function register(req, res) {
     req.session.role = user.role;
 
     // On ne renvoie JAMAIS le hash
-    res.status(201).json({
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      isPremium: user.isPremium,
-    });
+    res.status(201).json(publicUser(user));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error.' });
@@ -76,14 +103,7 @@ async function login(req, res) {
     req.session.userId = user.id;
     req.session.role = user.role;
 
-    res.json({
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      isPremium: user.isPremium,
-    });
+    res.json(publicUser(user));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error.' });
@@ -104,12 +124,12 @@ function logout(req, res) {
 async function me(req, res) {
   try {
     const user = await User.findByPk(req.session.userId, {
-      attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'isPremium'], // pas de passwordHash
+      attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'isPremium', 'premiumPlan', 'premiumUntil'],
     });
     if (!user) {
       return res.status(401).json({ message: 'User not found.' });
     }
-    res.json(user);
+    res.json(publicUser(user));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error.' });
@@ -119,14 +139,42 @@ async function me(req, res) {
 // ---------- SOUSCRIPTION PRO SIMULÉE ----------
 async function activatePremium(req, res) {
   try {
+    const planMonths = { monthly: 1, semester: 6, yearly: 12 };
+    const plan = req.body && req.body.plan;
+    if (plan !== 'free' && !Object.prototype.hasOwnProperty.call(planMonths, plan)) {
+      return res.status(400).json({ message: 'Choose a valid plan.' });
+    }
+
     const user = await User.findByPk(req.session.userId);
     if (!user) {
       return res.status(401).json({ message: 'User not found.' });
     }
 
+    if (plan === 'free') {
+      user.isPremium = false;
+      user.premiumPlan = null;
+      user.premiumUntil = null;
+      await user.save();
+      return res.json({ isPremium: false, premiumPlan: null, premiumUntil: null });
+    }
+
+    const months = planMonths[plan];
+    const today = dateString(new Date());
+    const currentExpiration =
+      isPremiumActive(user) && user.premiumUntil && user.premiumUntil > today
+        ? new Date(`${user.premiumUntil}T12:00:00`)
+        : new Date();
+    const premiumUntil = dateString(addMonthsClamped(currentExpiration, months));
+
     user.isPremium = true;
+    user.premiumPlan = plan;
+    user.premiumUntil = premiumUntil;
     await user.save();
-    res.json({ isPremium: user.isPremium });
+    res.json({
+      isPremium: true,
+      premiumPlan: user.premiumPlan,
+      premiumUntil: user.premiumUntil,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error.' });

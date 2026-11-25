@@ -39,6 +39,16 @@ const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: false,
   },
+  premiumPlan: {
+    type: DataTypes.ENUM('monthly', 'quarterly', 'semester', 'yearly'),
+    allowNull: true,
+    defaultValue: null,
+  },
+  premiumUntil: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    defaultValue: null,
+  },
 });
 
 module.exports = User;

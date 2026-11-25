@@ -102,7 +102,9 @@ Ouvrir ensuite http://localhost:5173 dans le navigateur.
 2. Après la connexion, la page d'accueil montre les permanences de la semaine et les groupes de révision des autres étudiants.
 3. **Réserver une salle** ouvre le plan du campus : choisir un jour et une heure, cliquer sur une salle libre (bleue au survol), remplir le formulaire.
 4. Une salle grise est occupée par un groupe ouvert : un clic permet de le rejoindre. Un cadenas rouge indique un groupe privé.
-5. **Mes réservations** permet de modifier ou supprimer ses réservations.
+5. **Mes réservations** permet de modifier la date, l'heure et la description, ou de supprimer ses réservations.
+6. Dans **Mes réservations**, un étudiant peut aussi quitter un groupe qu'il a rejoint.
+7. La page **Offres** propose un accès gratuit (une réservation de salle par semaine) et trois abonnements Pro simulés : 1 mois (1,99 €), 6 mois (9,99 €) ou un an (14,99 €). Aucun paiement réel n'est effectué.
 
 ### Créer un compte administrateur
 
@@ -122,6 +124,7 @@ Remplacer `1` par l'`id` du compte, puis se déconnecter et se reconnecter. Un a
 - Une salle ne peut pas être réservée deux fois sur le même créneau (détection de conflit).
 - Capacité maximale de 40 personnes par salle.
 - Seul le créateur (ou un admin) peut modifier ou supprimer une réservation.
+- Une modification de date ou d'heure respecte les mêmes règles et contrôles de conflit qu'une nouvelle réservation.
 - Seul un admin peut créer une permanence.
 
 ## Structure du projet
@@ -153,6 +156,7 @@ L'architecture backend suit le modèle **MVC** : les modèles (M) sont dans `mod
 
 - **Campuses** : les 4 campus
 - **Users** : les comptes (mot de passe haché avec bcrypt, rôle `student` ou `admin`)
+- **Premium Pro** : formule choisie et date d'expiration (activation de démonstration, sans paiement réel)
 - **Rooms** : les salles, rattachées à un campus
 - **Subjects** : les matières
 - **Teachers** : les professeurs, rattachés à une matière
@@ -169,6 +173,7 @@ Toutes les routes `/api/bookings` et `/api/auth/me` exigent d'être connecté.
 | POST | `/api/auth/login` | Connexion |
 | POST | `/api/auth/logout` | Déconnexion |
 | GET | `/api/auth/me` | Utilisateur connecté |
+| POST | `/api/auth/premium` | Activer une formule (`{"plan":"monthly"}`, `{"plan":"semester"}`, `{"plan":"yearly"}` ou `{"plan":"free"}`) |
 | GET | `/api/rooms/campuses` | Liste des campus |
 | GET | `/api/rooms?campusId=1` | Salles d'un campus |
 | GET | `/api/rooms/subjects` | Liste des matières |
@@ -179,6 +184,7 @@ Toutes les routes `/api/bookings` et `/api/auth/me` exigent d'être connecté.
 | GET | `/api/bookings/stats/subjects` | Matières les plus réservées |
 | POST | `/api/bookings` | Créer une réservation |
 | POST | `/api/bookings/:id/join` | Rejoindre une réservation |
+| DELETE | `/api/bookings/:id/leave` | Quitter un groupe rejoint |
 | PUT | `/api/bookings/:id` | Modifier une réservation |
 | DELETE | `/api/bookings/:id` | Supprimer une réservation |
 

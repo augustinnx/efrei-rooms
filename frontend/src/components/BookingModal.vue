@@ -198,16 +198,26 @@ async function submit() {
 
 <template>
   <div class="modal-backdrop" @click.self="emit('close')">
-    <div class="modal card" role="dialog" aria-modal="true">
-      <h2>Book room {{ room.name }}</h2>
+    <div class="modal card booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+      <header class="booking-modal-header">
+        <div class="booking-room-icon" aria-hidden="true">⌂</div>
+        <div>
+          <p class="booking-modal-eyebrow">NEW RESERVATION</p>
+          <h2 id="booking-modal-title">Book room {{ room.name }}</h2>
+          <p class="booking-modal-subtitle">Choose a time and tell your group what you’re planning.</p>
+        </div>
+        <button type="button" class="booking-modal-close" aria-label="Close booking form" @click="emit('close')">×</button>
+      </header>
 
-      <form @submit.prevent="submit">
-        <label for="date">Day</label>
-        <input id="date" type="date" :min="minDate" :max="maxDate" v-model="form.date" />
+      <form class="booking-form" @submit.prevent="submit">
+        <div class="booking-date-row">
+          <label for="date">Booking date</label>
+          <input id="date" type="date" :min="minDate" :max="maxDate" v-model="form.date" />
+        </div>
 
         <fieldset class="availability">
-          <legend>Availability · {{ room.name }}</legend>
-          <p class="availability-help">Choose a start time, then the duration.</p>
+          <legend><span class="availability-live-dot"></span> Available time slots</legend>
+          <p class="availability-help">Select an available start time. Your duration can’t overlap another booking.</p>
           <div class="availability-grid" aria-label="Room time slots">
             <button
               v-for="hour in hours"
@@ -237,7 +247,10 @@ async function submit() {
           </div>
         </fieldset>
 
-        <label>Duration · {{ pad(form.startHour) }}–{{ pad(form.endHour) }}</label>
+        <div class="duration-heading">
+          <label>Duration</label>
+          <span class="selected-time">{{ pad(form.startHour) }} – {{ pad(form.endHour) }}</span>
+        </div>
         <div class="duration-options" aria-label="Booking duration">
           <button
             v-for="duration in availableDurations"
@@ -253,36 +266,49 @@ async function submit() {
           </span>
         </div>
 
-        <label for="type">Purpose</label>
-        <select id="type" v-model="form.type">
-          <option value="revision">Study</option>
-          <option value="chill">Relax</option>
-          <option value="projet">Group project</option>
-          <option v-if="isAdmin" value="permanence">Office hours (admin)</option>
-        </select>
+        <div class="booking-details-grid">
+          <div class="booking-field">
+            <label for="type">Purpose</label>
+            <select id="type" v-model="form.type">
+              <option value="revision">Study</option>
+              <option value="chill">Relax</option>
+              <option value="projet">Group project</option>
+              <option v-if="isAdmin" value="permanence">Office hours (admin)</option>
+            </select>
+          </div>
 
-        <template v-if="form.type === 'revision' || form.type === 'permanence'">
-          <label for="subject">Subject</label>
-          <select id="subject" v-model.number="form.subjectId">
-            <option value="" disabled>Choose a subject</option>
-            <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
-          </select>
-        </template>
+          <div v-if="form.type === 'revision' || form.type === 'permanence'" class="booking-field">
+            <label for="subject">Subject</label>
+            <select id="subject" v-model.number="form.subjectId">
+              <option value="" disabled>Choose a subject</option>
+              <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
+            </select>
+          </div>
 
-        <label for="max">Number of people (max {{ room.capacity }})</label>
-        <input id="max" type="number" min="1" :max="room.capacity" v-model="form.maxParticipants" />
+          <div class="booking-field">
+            <label for="max">Group size <span>(up to {{ room.capacity }})</span></label>
+            <input id="max" type="number" min="1" :max="room.capacity" v-model="form.maxParticipants" />
+          </div>
 
-        <label for="description">A note for others (optional)</label>
-        <input id="description" type="text" maxlength="255" v-model="form.description" />
-
-        <p v-if="error" class="error">{{ error }}</p>
-
-        <div class="modal-buttons">
-          <button type="submit" :disabled="loading || loadingAvailability || !availabilityLoaded">
-            {{ loading ? 'Booking...' : 'Book' }}
-          </button>
-          <button type="button" class="btn-secondary-button" @click="emit('close')">Cancel</button>
+          <div class="booking-field booking-note-field">
+            <label for="description">Note for your group <span>(optional)</span></label>
+            <input id="description" type="text" maxlength="255" v-model="form.description" placeholder="What are you planning to work on?" />
+          </div>
         </div>
+
+        <div class="booking-privacy-note">
+          <span aria-hidden="true">✦</span>
+          <p>Your booking will be visible to students looking for a group.</p>
+        </div>
+
+        <p v-if="error" class="error booking-form-error" role="alert">{{ error }}</p>
+
+        <footer class="modal-buttons booking-modal-actions">
+          <button type="button" class="btn-secondary-button" @click="emit('close')">Cancel</button>
+          <button type="submit" :disabled="loading || loadingAvailability || !availabilityLoaded">
+            {{ loading ? 'Booking...' : 'Confirm booking' }}
+          </button>
+        </footer>
       </form>
     </div>
   </div>
