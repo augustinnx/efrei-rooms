@@ -10,7 +10,7 @@ function row(x, y, w, h, count) {
 
 const plans = {
   // Couloir central : 5 salles en haut, 5 en bas
-  'La Maison': {
+  'The House': {
     height: 380,
     decor: [
       { kind: 'decor-block', x: 20, y: 150, w: 60, h: 80, label: 'Entrée' },
@@ -19,41 +19,50 @@ const plans = {
     slots: [...row(20, 20, 132, 130, 5), ...row(20, 230, 132, 130, 5)],
   },
 
-  // Salles autour d'un atrium central
-  "L'Aquarium": {
-    height: 400,
+  // Aquarium : forme diagonale en U, atrium central décalé
+  'The Aquarium': {
+    height: 430,
     decor: [
-      { kind: 'atrium', x: 150, y: 140, w: 400, h: 120, label: 'Atrium' },
-      { kind: 'decor-block', x: 20, y: 20, w: 130, h: 120, label: 'Escaliers' },
-      { kind: 'decor-block', x: 550, y: 20, w: 130, h: 120, label: 'Sanitaires' },
-      { kind: 'decor-block', x: 20, y: 260, w: 130, h: 120, label: 'Accueil' },
-      { kind: 'decor-block', x: 550, y: 260, w: 130, h: 120, label: 'Cafétéria' },
+      { kind: 'corridor', x: 100, y: 150, w: 500, h: 55, label: 'Main passage' },
+      { kind: 'atrium', x: 245, y: 205, w: 210, h: 205, label: 'Aquarium atrium' },
+      { kind: 'decor-block', x: 20, y: 20, w: 150, h: 100, label: 'Lobby' },
+      { kind: 'decor-block', x: 530, y: 20, w: 150, h: 100, label: 'Elevators' },
+      { kind: 'decor-block', x: 20, y: 310, w: 150, h: 100, label: 'Café' },
+      { kind: 'decor-block', x: 530, y: 310, w: 150, h: 100, label: 'Restrooms' },
     ],
     slots: [
-      ...row(150, 20, 100, 120, 4), // en haut
-      { x: 550, y: 140, w: 130, h: 120 }, // à droite
-      ...row(150, 260, 100, 120, 4), // en bas
-      { x: 20, y: 140, w: 130, h: 120 }, // à gauche
+      { x: 170, y: 20, w: 100, h: 100 },
+      { x: 270, y: 20, w: 100, h: 100 },
+      { x: 370, y: 20, w: 140, h: 100 },
+      { x: 20, y: 150, w: 80, h: 130 },
+      { x: 600, y: 150, w: 80, h: 130 },
+      { x: 170, y: 230, w: 75, h: 180 },
+      { x: 455, y: 230, w: 75, h: 180 },
+      { x: 170, y: 330, w: 75, h: 80 },
+      { x: 455, y: 330, w: 75, h: 80 },
+      { x: 530, y: 230, w: 150, h: 80 },
     ],
   },
 
-  // Forme de H : deux couloirs verticaux reliés par un hall
-  'La Factory': {
-    height: 400,
+  // Factory : campus en grille industrielle avec atelier central
+  'The Factory': {
+    height: 460,
     decor: [
-      { kind: 'corridor', x: 160, y: 20, w: 50, h: 360, label: '' },
-      { kind: 'corridor', x: 490, y: 20, w: 50, h: 360, label: '' },
-      { kind: 'corridor', x: 210, y: 140, w: 280, h: 120, label: 'Hall central' },
+      { kind: 'corridor', x: 260, y: 20, w: 180, h: 420, label: 'Central walkway' },
+      { kind: 'decor-block', x: 20, y: 170, w: 240, h: 120, label: 'Workshop' },
+      { kind: 'decor-block', x: 440, y: 360, w: 240, h: 80, label: 'Machine room' },
     ],
     slots: [
-      { x: 20, y: 20, w: 140, h: 120 },
-      { x: 20, y: 140, w: 140, h: 120 },
-      { x: 20, y: 260, w: 140, h: 120 },
-      ...row(210, 20, 140, 120, 2),
-      ...row(210, 260, 140, 120, 2),
-      { x: 540, y: 20, w: 140, h: 120 },
-      { x: 540, y: 140, w: 140, h: 120 },
-      { x: 540, y: 260, w: 140, h: 120 },
+      { x: 20, y: 20, w: 115, h: 150 },
+      { x: 145, y: 20, w: 115, h: 150 },
+      { x: 20, y: 290, w: 115, h: 150 },
+      { x: 145, y: 290, w: 115, h: 150 },
+      { x: 440, y: 20, w: 115, h: 150 },
+      { x: 555, y: 20, w: 125, h: 150 },
+      { x: 440, y: 290, w: 115, h: 70 },
+      { x: 555, y: 290, w: 125, h: 70 },
+      { x: 440, y: 170, w: 115, h: 120 },
+      { x: 555, y: 170, w: 125, h: 120 },
     ],
   },
 
@@ -77,5 +86,5 @@ const plans = {
 
 // Retourne le plan d'un campus d'après son nom (La Maison par défaut)
 export function getPlan(campusName) {
-  return plans[campusName] || plans['La Maison']
+  return plans[campusName] || plans['The House']
 }
