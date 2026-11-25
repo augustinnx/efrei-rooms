@@ -1,11 +1,11 @@
 <template>
   <footer class="footer">
     <div class="container footer-inner">
-      <p>© 2026 EFREI Rooms, projet étudiant</p>
-      <nav aria-label="Liens du pied de page">
-        <a href="#">En savoir plus</a>
-        <a href="#">Contactez-nous</a>
-        <a href="#">Mentions légales</a>
+      <p>© 2026 EFREI Rooms, student project</p>
+      <nav aria-label="Footer links">
+        <a href="#">Learn more</a>
+        <a href="#">Contact us</a>
+        <a href="#">Legal notice</a>
       </nav>
     </div>
   </footer>

@@ -6,16 +6,16 @@ module.exports = {
   async up(queryInterface) {
     const now = new Date();
     const names = [
-      'Algorithmique',
-      'Programmation web',
-      'Bases de données',
-      'Mathématiques',
-      'Physique',
-      'Réseaux',
-      'Anglais',
-      'Électronique',
-      'Probabilités et statistiques',
-      'Gestion de projet',
+      'Algorithms',
+      'Web Programming',
+      'Databases',
+      'Mathematics',
+      'Physics',
+      'Networks',
+      'English',
+      'Electronics',
+      'Probability and Statistics',
+      'Project Management',
     ];
 
     // On transforme chaque nom en une ligne { name, createdAt, updatedAt }

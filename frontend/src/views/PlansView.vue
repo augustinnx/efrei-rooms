@@ -11,10 +11,10 @@ async function loadAccount() {
   try {
     const response = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' })
     const data = await response.json()
-    if (!response.ok) throw new Error(data.message || 'Impossible de charger votre compte.')
+    if (!response.ok) throw new Error(data.message || 'Unable to load your account.')
     isPremium.value = data.isPremium
   } catch (e) {
-    error.value = e.message || 'Impossible de charger votre compte.'
+    error.value = e.message || 'Unable to load your account.'
   } finally {
     loading.value = false
   }
@@ -30,11 +30,11 @@ async function activatePremium() {
       credentials: 'include',
     })
     const data = await response.json()
-    if (!response.ok) throw new Error(data.message || 'Impossible d’activer l’offre Pro.')
+    if (!response.ok) throw new Error(data.message || 'Unable to activate the Pro plan.')
     isPremium.value = data.isPremium
-    message.value = 'Votre offre Pro est activée.'
+    message.value = 'Your Pro plan is active.'
   } catch (e) {
-    error.value = e.message || 'Impossible d’activer l’offre Pro.'
+    error.value = e.message || 'Unable to activate the Pro plan.'
   } finally {
     activating.value = false
   }
@@ -45,11 +45,11 @@ onMounted(loadAccount)
 
 <template>
   <main class="container plans-page">
-    <RouterLink to="/my-bookings" class="back-link">← Mes réservations</RouterLink>
+    <RouterLink to="/my-bookings" class="back-link">← My bookings</RouterLink>
     <header class="plans-heading">
-      <span class="plans-eyebrow">EF'Rooms · Les offres</span>
-      <h1>Choisissez votre formule</h1>
-      <p>Les groupes de révision restent accessibles à tous, quelle que soit votre offre.</p>
+      <span class="plans-eyebrow">EF'Rooms · Plans</span>
+      <h1>Choose your plan</h1>
+      <p>Study groups remain accessible to everyone, regardless of your plan.</p>
     </header>
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -58,27 +58,27 @@ onMounted(loadAccount)
     <div class="plans-grid">
       <section class="plan-card card">
         <div>
-          <span class="plan-label">Pour commencer</span>
-          <h2>Gratuit</h2>
-          <p class="plan-price">0 € <span>/ toujours</span></p>
+          <span class="plan-label">To get started</span>
+          <h2>Free</h2>
+          <p class="plan-price">€0 <span>/ always</span></p>
           <ul>
-            <li>1 réservation de salle par semaine</li>
-            <li>Accès illimité aux groupes ouverts</li>
-            <li>Participation aux permanences</li>
+            <li>1 room booking per week</li>
+            <li>Unlimited access to open groups</li>
+            <li>Access to office hours</li>
           </ul>
         </div>
-        <span v-if="!isPremium && !loading" class="plan-current">Votre offre actuelle</span>
+        <span v-if="!isPremium && !loading" class="plan-current">Your current plan</span>
       </section>
 
       <section class="plan-card plan-card-pro card">
-        <div class="plan-ribbon">Le plus choisi</div>
-        <span class="plan-label">Plus de liberté</span>
+        <div class="plan-ribbon">Most popular</div>
+        <span class="plan-label">More flexibility</span>
         <h2>EF'Rooms Pro</h2>
-        <p class="plan-price">1,99 € <span>/ mois</span></p>
+        <p class="plan-price">€1.99 <span>/ month</span></p>
         <ul>
-          <li>Réservations de salles illimitées</li>
-          <li>Accès illimité aux groupes ouverts</li>
-          <li>Offre sans engagement</li>
+          <li>Unlimited room bookings</li>
+          <li>Unlimited access to open groups</li>
+          <li>No commitment</li>
         </ul>
         <button
           type="button"
@@ -86,10 +86,10 @@ onMounted(loadAccount)
           :disabled="loading || activating || isPremium"
           @click="activatePremium"
         >
-          {{ loading ? 'Chargement…' : activating ? 'Activation…' : isPremium ? 'Offre Pro active' : 'Passer Pro' }}
+          {{ loading ? 'Loading…' : activating ? 'Activating…' : isPremium ? 'Pro plan active' : 'Upgrade to Pro' }}
         </button>
       </section>
     </div>
-    <p class="plans-disclaimer">Simulation sans paiement : aucun moyen de paiement n’est demandé.</p>
+    <p class="plans-disclaimer">Payment-free demo: no payment method is required.</p>
   </main>
 </template>

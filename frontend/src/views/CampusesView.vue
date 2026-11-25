@@ -30,7 +30,7 @@ const planDate = ref(today)
 const planHour = ref(Math.min(Math.max(new Date().getHours(), 8), 19))
 const hours = Array.from({ length: 12 }, (_, i) => 8 + i) // de 8h à 19h
 
-const typeLabels = { revision: 'Révision', chill: 'Détente', projet: 'Projet', permanence: 'Permanence' }
+const typeLabels = { revision: 'Study', chill: 'Relax', projet: 'Project', permanence: 'Office hours' }
 
 // Le campus affiché : celui de l'adresse, sinon le premier de la liste
 const currentId = computed(() => {
@@ -44,10 +44,10 @@ async function loadRooms() {
   if (!currentId.value) return
   try {
     const response = await fetch(`http://localhost:3000/api/rooms?campusId=${currentId.value}`)
-    if (!response.ok) throw new Error('Erreur serveur')
+    if (!response.ok) throw new Error('Server error')
     rooms.value = await response.json()
   } catch (e) {
-    error.value = 'Impossible de charger les salles.'
+    error.value = 'Unable to load rooms.'
   }
 }
 
@@ -59,20 +59,20 @@ async function loadBookings() {
       `http://localhost:3000/api/bookings?campusId=${currentId.value}&date=${planDate.value}`,
       { credentials: 'include' }
     )
-    if (!response.ok) throw new Error('Erreur serveur')
+    if (!response.ok) throw new Error('Server error')
     bookings.value = await response.json()
   } catch (e) {
-    error.value = 'Impossible de charger les réservations.'
+    error.value = 'Unable to load bookings.'
   }
 }
 
 onMounted(async () => {
   try {
     const response = await fetch('http://localhost:3000/api/rooms/campuses')
-    if (!response.ok) throw new Error('Erreur serveur')
+    if (!response.ok) throw new Error('Server error')
     campuses.value = await response.json()
   } catch (e) {
-    error.value = 'Impossible de charger les campus.'
+    error.value = 'Unable to load campuses.'
   }
 })
 
@@ -147,13 +147,13 @@ async function join(booking) {
     error.value = data.message
     return
   }
-  message.value = `Vous avez rejoint la salle ${booking.Room.name}.`
+  message.value = `You joined room ${booking.Room.name}.`
 }
 
 // Appelée quand le formulaire dit "réservation créée"
 function onCreated() {
   selectedRoom.value = null
-  message.value = 'Réservation créée !'
+  message.value = 'Booking created!'
   loadBookings() // le plan se met à jour
 }
 </script>
@@ -177,11 +177,11 @@ function onCreated() {
     <!-- Le jour et l'heure à afficher sur le plan -->
     <div class="plan-controls">
       <div>
-        <label for="planDate">Jour</label>
+        <label for="planDate">Day</label>
         <input id="planDate" type="date" :min="today" :max="maxDate" v-model="planDate" />
       </div>
       <div>
-        <label for="planHour">Heure</label>
+        <label for="planHour">Time</label>
         <select id="planHour" v-model.number="planHour">
           <option v-for="h in hours" :key="h" :value="h">{{ h }}h</option>
         </select>
@@ -192,10 +192,10 @@ function onCreated() {
     <p v-if="error" class="error">{{ error }}</p>
 
     <!-- Le plan du campus, dessiné en SVG -->
-    <svg viewBox="0 0 700 380" class="plan" role="img" aria-label="Plan du campus">
+    <svg viewBox="0 0 700 380" class="plan" role="img" aria-label="Campus map">
       <!-- Le couloir au milieu -->
       <rect x="20" y="150" width="660" height="80" class="corridor" />
-      <text x="350" y="195" class="corridor-label">Couloir</text>
+      <text x="350" y="195" class="corridor-label">Corridor</text>
 
       <!-- Une salle par élément de la liste -->
       <g
@@ -222,9 +222,9 @@ function onCreated() {
     </svg>
 
     <div class="legend">
-      <span class="legend-item"><span class="legend-box free"></span> Disponible</span>
-      <span class="legend-item"><span class="legend-box open"></span> Groupe ouvert : cliquer pour rejoindre</span>
-      <span class="legend-item"><span class="legend-box busy"></span> Indisponible</span>
+      <span class="legend-item"><span class="legend-box free"></span> Available</span>
+      <span class="legend-item"><span class="legend-box open"></span> Open group: click to join</span>
+      <span class="legend-item"><span class="legend-box busy"></span> Unavailable</span>
     </div>
 
     <!-- La fenêtre de réservation, affichée seulement si une salle est choisie -->

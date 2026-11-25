@@ -27,9 +27,9 @@ async function logout() {
 
       <!-- Affiché seulement sur les pages réservées aux connectés -->
       <nav v-if="route.meta.requiresAuth" class="topbar-nav">
-        <RouterLink to="/campuses">Réserver une salle</RouterLink>
-        <RouterLink to="/my-bookings">Mes réservations</RouterLink>
-        <button type="button" class="icon-button" @click="logout" aria-label="Se déconnecter" title="Se déconnecter">
+        <RouterLink to="/campuses">Book a room</RouterLink>
+        <RouterLink to="/my-bookings">My bookings</RouterLink>
+        <button type="button" class="icon-button" @click="logout" aria-label="Log out" title="Log out">
           <img :src="logoutIcon" alt="" class="icon" />
         </button>
       </nav>

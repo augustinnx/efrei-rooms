@@ -2,7 +2,7 @@
 function requireAuth(req, res, next) {
   // req.session.userId est rempli au moment de la connexion
   if (!req.session.userId) {
-    return res.status(401).json({ message: 'Vous devez être connecté.' });
+    return res.status(401).json({ message: 'You must be logged in.' });
   }
   next(); // tout va bien, on passe à la route suivante
 }
@@ -10,10 +10,10 @@ function requireAuth(req, res, next) {
 // Gardien 2 : l'utilisateur doit être admin
 function requireAdmin(req, res, next) {
   if (!req.session.userId) {
-    return res.status(401).json({ message: 'Vous devez être connecté.' });
+    return res.status(401).json({ message: 'You must be logged in.' });
   }
   if (req.session.role !== 'admin') {
-    return res.status(403).json({ message: 'Accès réservé aux administrateurs.' });
+    return res.status(403).json({ message: 'Access restricted to administrators.' });
   }
   next();
 }

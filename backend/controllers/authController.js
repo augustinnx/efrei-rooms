@@ -16,7 +16,7 @@ async function register(req, res) {
     // 2. L'email est-il déjà utilisé ?
     const existing = await User.findOne({ where: { email } });
     if (existing) {
-      return res.status(409).json({ message: 'Cet email est déjà utilisé.' });
+      return res.status(409).json({ message: 'This email is already in use.' });
     }
 
     // 4. On hashe le mot de passe (10 = nombre de tours de calcul)
@@ -47,7 +47,7 @@ async function register(req, res) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -69,7 +69,7 @@ async function login(req, res) {
     //    on ne dit pas à un pirate quel email existe.
     const passwordOk = user && (await bcrypt.compare(password, user.passwordHash));
     if (!passwordOk) {
-      return res.status(401).json({ message: 'Email ou mot de passe incorrect.' });
+      return res.status(401).json({ message: 'Incorrect email or password.' });
     }
 
     // 3. Tout est bon : on ouvre la session
@@ -86,7 +86,7 @@ async function login(req, res) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -95,7 +95,7 @@ function logout(req, res) {
   // On détruit la session côté serveur et on efface le cookie
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
-    res.json({ message: 'Déconnecté.' });
+    res.json({ message: 'Logged out.' });
   });
 }
 
@@ -107,12 +107,12 @@ async function me(req, res) {
       attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'isPremium'], // pas de passwordHash
     });
     if (!user) {
-      return res.status(401).json({ message: 'Utilisateur introuvable.' });
+      return res.status(401).json({ message: 'User not found.' });
     }
     res.json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -121,7 +121,7 @@ async function activatePremium(req, res) {
   try {
     const user = await User.findByPk(req.session.userId);
     if (!user) {
-      return res.status(401).json({ message: 'Utilisateur introuvable.' });
+      return res.status(401).json({ message: 'User not found.' });
     }
 
     user.isPremium = true;
@@ -129,7 +129,7 @@ async function activatePremium(req, res) {
     res.json({ isPremium: user.isPremium });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 

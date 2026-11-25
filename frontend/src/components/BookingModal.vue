@@ -102,7 +102,7 @@ async function loadAvailability() {
       { credentials: 'include' }
     )
     const data = await response.json()
-    if (!response.ok) throw new Error(data.message || 'Impossible de charger les disponibilités.')
+    if (!response.ok) throw new Error(data.message || 'Unable to load availability.')
     if (requestId !== availabilityRequest) return
     bookings.value = data
     availabilityLoaded.value = true
@@ -113,7 +113,7 @@ async function loadAvailability() {
     error.value = ''
   } catch (e) {
     if (requestId === availabilityRequest) {
-      error.value = e.message || 'Impossible de charger les disponibilités.'
+      error.value = e.message || 'Unable to load availability.'
     }
   } finally {
     if (requestId === availabilityRequest) loadingAvailability.value = false
@@ -127,10 +127,10 @@ onMounted(async () => {
 
   try {
     const response = await fetch('http://localhost:3000/api/rooms/subjects')
-    if (!response.ok) throw new Error('Impossible de charger les matières.')
+    if (!response.ok) throw new Error('Unable to load subjects.')
     subjects.value = await response.json()
   } catch (e) {
-    error.value = e.message || 'Impossible de charger les matières.'
+    error.value = e.message || 'Unable to load subjects.'
   }
 
   try {
@@ -143,17 +143,17 @@ onMounted(async () => {
 
 function validate() {
   const f = form.value
-  if (!availabilityLoaded.value) return 'Les disponibilités ne sont pas encore chargées.'
-  if (!f.date) return 'Choisissez une date.'
+  if (!availabilityLoaded.value) return 'Availability has not loaded yet.'
+  if (!f.date) return 'Choose a date.'
   const day = new Date(`${f.date}T12:00:00`).getDay()
-  if (day === 0 || day === 6) return 'Réservation possible du lundi au vendredi.'
-  if (f.endHour <= f.startHour) return "L'heure de fin doit être après l'heure de début."
-  if ((f.type === 'revision' || f.type === 'permanence') && !f.subjectId) return 'Choisissez une matière.'
+  if (day === 0 || day === 6) return 'Bookings are available Monday through Friday.'
+  if (f.endHour <= f.startHour) return 'End time must be after start time.'
+  if ((f.type === 'revision' || f.type === 'permanence') && !f.subjectId) return 'Choose a subject.'
   if (f.maxParticipants < 1 || f.maxParticipants > props.room.capacity) {
-    return `Le nombre de places doit être entre 1 et ${props.room.capacity}.`
+    return `The number of spots must be between 1 and ${props.room.capacity}.`
   }
   if (!availableDurations.value.includes(f.endHour - f.startHour)) {
-    return 'La durée choisie inclut un créneau indisponible.'
+    return 'The selected duration includes an unavailable time slot.'
   }
   return ''
 }
@@ -189,7 +189,7 @@ async function submit() {
 
     emit('created')
   } catch (e) {
-    error.value = 'Serveur injoignable.'
+    error.value = 'Server unreachable.'
   } finally {
     loading.value = false
   }
@@ -199,16 +199,16 @@ async function submit() {
 <template>
   <div class="modal-backdrop" @click.self="emit('close')">
     <div class="modal card" role="dialog" aria-modal="true">
-      <h2>Réserver la salle {{ room.name }}</h2>
+      <h2>Book room {{ room.name }}</h2>
 
       <form @submit.prevent="submit">
-        <label for="date">Jour</label>
+        <label for="date">Day</label>
         <input id="date" type="date" :min="minDate" :max="maxDate" v-model="form.date" />
 
         <fieldset class="availability">
-          <legend>Disponibilités · {{ room.name }}</legend>
-          <p class="availability-help">Choisissez une heure de début, puis la durée.</p>
-          <div class="availability-grid" aria-label="Créneaux horaires de la salle">
+          <legend>Availability · {{ room.name }}</legend>
+          <p class="availability-help">Choose a start time, then the duration.</p>
+          <div class="availability-grid" aria-label="Room time slots">
             <button
               v-for="hour in hours"
               :key="hour"
@@ -219,26 +219,26 @@ async function submit() {
                 { 'is-selected': hour >= form.startHour && hour < form.endHour },
               ]"
               :disabled="loadingAvailability || slotState(hour) !== 'available'"
-              :aria-label="`${pad(hour)} à ${pad(hour + 1)} ${
-                slotState(hour) === 'available' ? 'disponible' :
-                slotState(hour) === 'group' ? 'groupe ouvert' :
-                slotState(hour) === 'past' ? 'heure passée' : 'indisponible'
+              :aria-label="`${pad(hour)} to ${pad(hour + 1)} ${
+                slotState(hour) === 'available' ? 'available' :
+                slotState(hour) === 'group' ? 'open group' :
+                slotState(hour) === 'past' ? 'past time' : 'unavailable'
               }`"
               @click="selectSlot(hour)"
             >
               {{ pad(hour) }}–{{ pad(hour + 1) }}
             </button>
           </div>
-          <p v-if="loadingAvailability" class="availability-help">Chargement des créneaux…</p>
+          <p v-if="loadingAvailability" class="availability-help">Loading time slots…</p>
           <div class="legend availability-legend">
-            <span class="legend-item"><span class="legend-box free"></span> Disponible</span>
-            <span class="legend-item"><span class="legend-box open"></span> Groupe ouvert</span>
-            <span class="legend-item"><span class="legend-box busy"></span> Indisponible</span>
+            <span class="legend-item"><span class="legend-box free"></span> Available</span>
+            <span class="legend-item"><span class="legend-box open"></span> Open group</span>
+            <span class="legend-item"><span class="legend-box busy"></span> Unavailable</span>
           </div>
         </fieldset>
 
-        <label>Durée · {{ pad(form.startHour) }}–{{ pad(form.endHour) }}</label>
-        <div class="duration-options" aria-label="Durée de la réservation">
+        <label>Duration · {{ pad(form.startHour) }}–{{ pad(form.endHour) }}</label>
+        <div class="duration-options" aria-label="Booking duration">
           <button
             v-for="duration in availableDurations"
             :key="duration"
@@ -249,39 +249,39 @@ async function submit() {
             {{ duration }} h
           </button>
           <span v-if="availableDurations.length === 0" class="error">
-            Aucun créneau libre après cette heure.
+            No free time slot after this time.
           </span>
         </div>
 
-        <label for="type">Motif</label>
+        <label for="type">Purpose</label>
         <select id="type" v-model="form.type">
-          <option value="revision">Révision</option>
-          <option value="chill">Détente</option>
-          <option value="projet">Projet de groupe</option>
-          <option v-if="isAdmin" value="permanence">Permanence (admin)</option>
+          <option value="revision">Study</option>
+          <option value="chill">Relax</option>
+          <option value="projet">Group project</option>
+          <option v-if="isAdmin" value="permanence">Office hours (admin)</option>
         </select>
 
         <template v-if="form.type === 'revision' || form.type === 'permanence'">
-          <label for="subject">Matière</label>
+          <label for="subject">Subject</label>
           <select id="subject" v-model.number="form.subjectId">
-            <option value="" disabled>Choisir une matière</option>
+            <option value="" disabled>Choose a subject</option>
             <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
           </select>
         </template>
 
-        <label for="max">Nombre de personnes (max {{ room.capacity }})</label>
+        <label for="max">Number of people (max {{ room.capacity }})</label>
         <input id="max" type="number" min="1" :max="room.capacity" v-model="form.maxParticipants" />
 
-        <label for="description">Un mot pour les autres (facultatif)</label>
+        <label for="description">A note for others (optional)</label>
         <input id="description" type="text" maxlength="255" v-model="form.description" />
 
         <p v-if="error" class="error">{{ error }}</p>
 
         <div class="modal-buttons">
           <button type="submit" :disabled="loading || loadingAvailability || !availabilityLoaded">
-            {{ loading ? 'Réservation...' : 'Réserver' }}
+            {{ loading ? 'Booking...' : 'Book' }}
           </button>
-          <button type="button" class="btn-secondary-button" @click="emit('close')">Annuler</button>
+          <button type="button" class="btn-secondary-button" @click="emit('close')">Cancel</button>
         </div>
       </form>
     </div>

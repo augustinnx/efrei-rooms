@@ -18,13 +18,13 @@ const loading = ref(false)
 // Validation côté CLIENT : on vérifie avant d'envoyer
 function validate() {
   if (!form.value.firstName.trim() || !form.value.lastName.trim()) {
-    return 'Le prénom et le nom sont obligatoires.'
+    return 'First and last name are required.'
   }
   if (!form.value.email.trim().endsWith('@efrei.net')) {
-    return 'Utilisez votre adresse @efrei.net.'
+    return 'Use your @efrei.net address.'
   }
   if (form.value.password.length < 8) {
-    return 'Le mot de passe doit faire au moins 8 caractères.'
+    return 'Password must contain at least 8 characters.'
   }
   return ''
 }
@@ -52,7 +52,7 @@ async function submit() {
 
     router.push('/dashboard') // succès : on est connecté, direction l'accueil
   } catch (e) {
-    error.value = 'Serveur injoignable.'
+    error.value = 'Server unreachable.'
   } finally {
     loading.value = false
   }
@@ -61,26 +61,26 @@ async function submit() {
 
 <template>
   <main class="container">
-    <h1>Créer un compte</h1>
+    <h1>Create an account</h1>
 
     <div class="card">
       <form @submit.prevent="submit">
-        <label for="firstName">Prénom</label>
+        <label for="firstName">First name</label>
         <input id="firstName" type="text" v-model="form.firstName" />
 
-        <label for="lastName">Nom</label>
+        <label for="lastName">Last name</label>
         <input id="lastName" type="text" v-model="form.lastName" />
 
-        <label for="email">Email EFREI</label>
+        <label for="email">EFREI email</label>
         <input id="email" type="email" v-model="form.email" placeholder="prenom.nom@efrei.net" />
 
-        <label for="password">Mot de passe (8 caractères minimum)</label>
+        <label for="password">Password (8 characters minimum)</label>
         <input id="password" type="password" v-model="form.password" />
 
         <p v-if="error" class="error">{{ error }}</p>
 
         <button type="submit" :disabled="loading">
-          {{ loading ? 'Création...' : 'Créer mon compte' }}
+          {{ loading ? 'Creating...' : 'Create my account' }}
         </button>
       </form>
     </div>

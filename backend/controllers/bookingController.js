@@ -27,7 +27,7 @@ async function listBookings(req, res) {
     const { campusId, date } = req.query;
 
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return res.status(400).json({ message: 'Date invalide (format AAAA-MM-JJ).' });
+      return res.status(400).json({ message: 'Invalid date (YYYY-MM-DD format).' });
     }
 
     const roomFilter = {};
@@ -51,7 +51,7 @@ async function listBookings(req, res) {
     res.json(bookings);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -74,52 +74,52 @@ async function createBooking(req, res) {
 
     // 2. Règles sur les heures
     if (start >= end) {
-      return res.status(400).json({ message: "L'heure de fin doit être après l'heure de début." });
+      return res.status(400).json({ message: 'End time must be after start time.' });
     }
     if (start < 8 || end > 20) {
-      return res.status(400).json({ message: 'Les salles sont ouvertes de 8h à 20h.' });
+      return res.status(400).json({ message: 'Rooms are open from 8 AM to 8 PM.' });
     }
 
     // 3. Règles sur le jour : pas de week-end
     const dayOfWeek = new Date(`${date}T12:00:00`).getDay(); // 0 = dimanche, 6 = samedi
     if (dayOfWeek === 0 || dayOfWeek === 6) {
-      return res.status(400).json({ message: 'Les réservations sont possibles du lundi au vendredi.' });
+      return res.status(400).json({ message: 'Bookings are available Monday through Friday.' });
     }
 
     // 4. Pas dans le passé, et 7 jours maximum à l'avance
     const now = new Date();
     const todayString = toDateString(now);
     if (date < todayString) {
-      return res.status(400).json({ message: 'Impossible de réserver dans le passé.' });
+      return res.status(400).json({ message: 'Cannot book in the past.' });
     }
     if (date === todayString && start <= now.getHours()) {
-      return res.status(400).json({ message: 'Ce créneau a déjà commencé.' });
+      return res.status(400).json({ message: 'This time slot has already started.' });
     }
     const limit = new Date();
     limit.setDate(limit.getDate() + 7);
     if (date > toDateString(limit)) {
-      return res.status(400).json({ message: 'Réservation possible 7 jours à l’avance maximum.' });
+      return res.status(400).json({ message: 'Bookings can be made up to 7 days in advance.' });
     }
 
     // 5. Seul un admin peut créer une permanence
     if (type === 'permanence' && req.session.role !== 'admin') {
-      return res.status(403).json({ message: 'Seul un administrateur peut créer une permanence.' });
+      return res.status(403).json({ message: 'Only an administrator can create office hours.' });
     }
 
     // 6. La salle existe-t-elle ?
     const room = await Room.findByPk(roomId);
     if (!room) {
-      return res.status(400).json({ message: "Cette salle n'existe pas." });
+      return res.status(400).json({ message: 'This room does not exist.' });
     }
 
     // 7. Une révision doit avoir une matière, et la matière doit exister
     if (type === 'revision' && !subjectId) {
-      return res.status(400).json({ message: 'Choisissez une matière pour une révision.' });
+      return res.status(400).json({ message: 'Choose a subject for study.' });
     }
     if (subjectId) {
       const subject = await Subject.findByPk(subjectId);
       if (!subject) {
-        return res.status(400).json({ message: "Cette matière n'existe pas." });
+        return res.status(400).json({ message: 'This subject does not exist.' });
       }
     }
 
@@ -130,7 +130,7 @@ async function createBooking(req, res) {
         lock: transaction.LOCK.UPDATE,
       });
       if (!user) {
-        return { status: 401, message: 'Utilisateur introuvable.' };
+        return { status: 401, message: 'User not found.' };
       }
 
       const { start: weekStart, nextStart: nextWeekStart } = currentWeekRange();
@@ -147,7 +147,7 @@ async function createBooking(req, res) {
       if (!user.isPremium && weeklyBookings >= 1) {
         return {
           status: 403,
-          message: 'Votre réservation gratuite de la semaine est déjà utilisée. Passez Pro pour réserver sans limite.',
+          message: 'Your free weekly room booking has already been used. Upgrade to Pro to book without limits.',
         };
       }
 
@@ -162,7 +162,7 @@ async function createBooking(req, res) {
         transaction,
       });
       if (conflict) {
-        return { status: 409, message: 'Cette salle est déjà réservée sur ce créneau.' };
+        return { status: 409, message: 'This room is already booked for this time slot.' };
       }
 
       const booking = await Booking.create({
@@ -186,7 +186,7 @@ async function createBooking(req, res) {
     res.status(201).json(result.booking);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -196,25 +196,25 @@ async function joinBooking(req, res) {
   try {
     const bookingId = parseInt(req.params.id, 10);
     if (Number.isNaN(bookingId)) {
-      return res.status(400).json({ message: 'Identifiant invalide.' });
+      return res.status(400).json({ message: 'Invalid identifier.' });
     }
 
     // 1. La réservation existe-t-elle ?
     const booking = await Booking.findByPk(bookingId);
     if (!booking || booking.status === 'cancelled') {
-      return res.status(404).json({ message: 'Réservation introuvable.' });
+      return res.status(404).json({ message: 'Booking not found.' });
     }
 
     // 2. Le créateur est déjà dedans d'office
     if (booking.creatorId === req.session.userId) {
-      return res.status(400).json({ message: 'Vous êtes le créateur de cette réservation.' });
+      return res.status(400).json({ message: 'You created this booking.' });
     }
 
     // 3. La réservation est-elle déjà terminée ?
     const now = new Date();
     const endHour = parseInt(booking.endTime.slice(0, 2), 10);
     if (booking.date < toDateString(now) || (booking.date === toDateString(now) && endHour <= now.getHours())) {
-      return res.status(400).json({ message: 'Cette réservation est terminée.' });
+      return res.status(400).json({ message: 'This booking has ended.' });
     }
 
     // 4. A-t-on déjà rejoint ?
@@ -222,13 +222,13 @@ async function joinBooking(req, res) {
       where: { bookingId, userId: req.session.userId },
     });
     if (already) {
-      return res.status(409).json({ message: 'Vous avez déjà demandé à rejoindre cette réservation.' });
+      return res.status(409).json({ message: 'You have already requested to join this booking.' });
     }
 
     // 5. Reste-t-il de la place ? (participants acceptés + le créateur)
     const taken = (await BookingParticipant.count({ where: { bookingId, status: 'accepted' } })) + 1;
     if (taken >= booking.maxParticipants) {
-      return res.status(409).json({ message: 'Cette réservation est complète.' });
+      return res.status(409).json({ message: 'This booking is full.' });
     }
 
     const participant = await BookingParticipant.create({
@@ -240,7 +240,7 @@ async function joinBooking(req, res) {
     res.status(201).json(participant);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -250,27 +250,27 @@ async function deleteBooking(req, res) {
   try {
     const bookingId = parseInt(req.params.id, 10);
     if (Number.isNaN(bookingId)) {
-      return res.status(400).json({ message: 'Identifiant invalide.' });
+      return res.status(400).json({ message: 'Invalid identifier.' });
     }
 
     const booking = await Booking.findByPk(bookingId);
     if (!booking) {
-      return res.status(404).json({ message: 'Réservation introuvable.' });
+      return res.status(404).json({ message: 'Booking not found.' });
     }
 
     // AUTORISATION : seul le créateur ou un admin peut supprimer
     if (booking.creatorId !== req.session.userId && req.session.role !== 'admin') {
-      return res.status(403).json({ message: "Vous ne pouvez supprimer que vos propres réservations." });
+      return res.status(403).json({ message: 'You can only delete your own bookings.' });
     }
 
     // Garder la réservation annulée pour qu'elle reste comptabilisée dans le quota hebdomadaire.
     booking.status = 'cancelled';
     await booking.save();
 
-    res.json({ message: 'Réservation supprimée.' });
+    res.json({ message: 'Booking deleted.' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -282,17 +282,17 @@ async function updateBooking(req, res) {
   try {
     const bookingId = parseInt(req.params.id, 10);
     if (Number.isNaN(bookingId)) {
-      return res.status(400).json({ message: 'Identifiant invalide.' });
+      return res.status(400).json({ message: 'Invalid identifier.' });
     }
 
     const booking = await Booking.findByPk(bookingId);
     if (!booking || booking.status === 'cancelled') {
-      return res.status(404).json({ message: 'Réservation introuvable.' });
+      return res.status(404).json({ message: 'Booking not found.' });
     }
 
     // AUTORISATION : seul le créateur ou un admin peut modifier
     if (booking.creatorId !== req.session.userId && req.session.role !== 'admin') {
-      return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres réservations.' });
+      return res.status(403).json({ message: 'You can only edit your own bookings.' });
     }
 
     const { description, visibility, maxParticipants, subjectId } = req.body;
@@ -300,7 +300,7 @@ async function updateBooking(req, res) {
     // Visibilité
     if (visibility !== undefined) {
       if (visibility !== 'open') {
-        return res.status(400).json({ message: 'Visibilité invalide.' });
+        return res.status(400).json({ message: 'Invalid visibility.' });
       }
       booking.visibility = visibility;
     }
@@ -309,11 +309,11 @@ async function updateBooking(req, res) {
     if (maxParticipants !== undefined) {
       const max = parseInt(maxParticipants, 10);
       if (Number.isNaN(max) || max < 1 || max > 40) {
-        return res.status(400).json({ message: 'Le nombre de places doit être entre 1 et 40.' });
+        return res.status(400).json({ message: 'The number of spots must be between 1 and 40.' });
       }
       const taken = (await BookingParticipant.count({ where: { bookingId, status: 'accepted' } })) + 1;
       if (max < taken) {
-        return res.status(409).json({ message: `Il y a déjà ${taken} participants, vous ne pouvez pas descendre en dessous.` });
+        return res.status(409).json({ message: `There are already ${taken} participants; you cannot go below that number.` });
       }
       booking.maxParticipants = max;
     }
@@ -322,13 +322,13 @@ async function updateBooking(req, res) {
     if (subjectId !== undefined) {
       if (subjectId === null) {
         if (booking.type === 'revision') {
-          return res.status(400).json({ message: 'Une révision doit avoir une matière.' });
+          return res.status(400).json({ message: 'A study session must have a subject.' });
         }
         booking.subjectId = null;
       } else {
         const subject = await Subject.findByPk(subjectId);
         if (!subject) {
-          return res.status(400).json({ message: "Cette matière n'existe pas." });
+          return res.status(400).json({ message: 'This subject does not exist.' });
         }
         booking.subjectId = subject.id;
       }
@@ -337,7 +337,7 @@ async function updateBooking(req, res) {
     // Description
     if (description !== undefined) {
       if (description && description.length > 255) {
-        return res.status(400).json({ message: 'Description trop longue (255 max).' });
+        return res.status(400).json({ message: 'Description is too long (255 characters maximum).' });
       }
       booking.description = description || null;
     }
@@ -346,7 +346,7 @@ async function updateBooking(req, res) {
     res.json(booking);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -369,7 +369,7 @@ async function listMyBookings(req, res) {
       }),
     ]);
     if (!user) {
-      return res.status(401).json({ message: 'Utilisateur introuvable.' });
+      return res.status(401).json({ message: 'User not found.' });
     }
 
     // 1. Les réservations que j'ai créées
@@ -418,7 +418,7 @@ async function listMyBookings(req, res) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -470,7 +470,7 @@ async function listUpcoming(req, res) {
     res.json(data);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -491,7 +491,7 @@ async function topSubjects(req, res) {
     res.json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 

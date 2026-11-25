@@ -15,7 +15,7 @@ const loading = ref(false)
 // Validation côté CLIENT
 function validate() {
   if (!form.value.email.trim() || !form.value.password) {
-    return 'Email et mot de passe obligatoires.'
+    return 'Email and password are required.'
   }
   return ''
 }
@@ -41,7 +41,7 @@ async function submit() {
 
     router.push('/dashboard') // connecté : on arrive sur la page d'accueil
   } catch (e) {
-    error.value = 'Serveur injoignable.'
+    error.value = 'Server unreachable.'
   } finally {
     loading.value = false
   }
@@ -50,26 +50,26 @@ async function submit() {
 
 <template>
   <main class="container">
-    <h1>Connexion</h1>
+    <h1>Log in</h1>
 
     <div class="card">
       <form @submit.prevent="submit">
-        <label for="email">Email EFREI</label>
+        <label for="email">EFREI email</label>
         <input id="email" type="email" v-model="form.email" placeholder="prenom.nom@efrei.net" />
 
-        <label for="password">Mot de passe</label>
+        <label for="password">Password</label>
         <input id="password" type="password" v-model="form.password" />
 
         <p v-if="error" class="error">{{ error }}</p>
 
         <button type="submit" :disabled="loading">
-          {{ loading ? 'Connexion...' : 'Se connecter' }}
+          {{ loading ? 'Logging in...' : 'Log in' }}
         </button>
       </form>
 
       <p>
-        Pas encore de compte ?
-        <RouterLink to="/register">Inscription</RouterLink>
+        Don't have an account yet?
+        <RouterLink to="/register">Sign up</RouterLink>
       </p>
     </div>
   </main>

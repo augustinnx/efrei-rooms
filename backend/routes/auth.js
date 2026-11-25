@@ -7,24 +7,24 @@ const router = express.Router();
 
 // Règles de validation pour l'inscription (côté SERVEUR)
 const registerRules = [
-  body('firstName').trim().notEmpty().withMessage('Le prénom est obligatoire.'),
-  body('lastName').trim().notEmpty().withMessage('Le nom est obligatoire.'),
+  body('firstName').trim().notEmpty().withMessage('First name is required.'),
+  body('lastName').trim().notEmpty().withMessage('Last name is required.'),
   body('email')
     .trim()
     .isEmail()
-    .withMessage('Email invalide.')
+    .withMessage('Invalid email.')
     .normalizeEmail()
     .custom((value) => value.endsWith('@efrei.net'))
-    .withMessage('Utilisez votre adresse @efrei.net.'),
+    .withMessage('Use your @efrei.net address.'),
   body('password')
     .isLength({ min: 8 })
-    .withMessage('Le mot de passe doit faire au moins 8 caractères.'),
+    .withMessage('Password must contain at least 8 characters.'),
 ];
 
 // Règles de validation pour la connexion
 const loginRules = [
-  body('email').trim().isEmail().withMessage('Email invalide.').normalizeEmail(),
-  body('password').notEmpty().withMessage('Le mot de passe est obligatoire.'),
+  body('email').trim().isEmail().withMessage('Invalid email.').normalizeEmail(),
+  body('password').notEmpty().withMessage('Password is required.'),
 ];
 
 // POST /api/auth/register  -> créer un compte

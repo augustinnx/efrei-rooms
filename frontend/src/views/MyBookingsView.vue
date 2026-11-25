@@ -12,26 +12,26 @@ const editingId = ref(null)
 const editForm = ref({ description: '' })
 
 const typeLabels = {
-  revision: 'Révision',
-  chill: 'Détente',
-  projet: 'Projet de groupe',
-  permanence: 'Permanence',
+  revision: 'Study',
+  chill: 'Relax',
+  projet: 'Group project',
+  permanence: 'Office hours',
 }
 
-const statusLabels = { accepted: 'Acceptée', pending: 'En attente', refused: 'Refusée' }
+const statusLabels = { accepted: 'Accepted', pending: 'Pending', refused: 'Declined' }
 
 async function load() {
   try {
     const response = await fetch('http://localhost:3000/api/bookings/mine', {
       credentials: 'include',
     })
-    if (!response.ok) throw new Error('Erreur serveur')
+    if (!response.ok) throw new Error('Server error')
     const data = await response.json()
     created.value = data.created
     joined.value = data.joined
     quota.value = data.reservationQuota
   } catch (e) {
-    error.value = 'Impossible de charger vos réservations.'
+    error.value = 'Unable to load your bookings.'
   }
 }
 
@@ -39,7 +39,7 @@ onMounted(load)
 
 // DELETE : supprimer une réservation que j'ai créée
 async function removeBooking(booking) {
-  if (!confirm(`Supprimer la réservation de la salle ${booking.Room.name} ?`)) return
+  if (!confirm(`Delete the booking for room ${booking.Room.name}?`)) return
   const response = await fetch(`http://localhost:3000/api/bookings/${booking.id}`, {
     method: 'DELETE',
     credentials: 'include',
@@ -50,7 +50,7 @@ async function removeBooking(booking) {
     return
   }
   error.value = ''
-  message.value = 'Réservation supprimée.'
+  message.value = 'Booking deleted.'
   await load()
 }
 
@@ -75,44 +75,44 @@ async function saveEdit(booking) {
   }
   error.value = ''
   editingId.value = null
-  message.value = 'Réservation modifiée.'
+  message.value = 'Booking updated.'
   await load()
 }
 </script>
 
 <template>
   <main class="container">
-    <h1>Mes réservations</h1>
+    <h1>My bookings</h1>
 
     <p v-if="message" class="success">{{ message }}</p>
     <p v-if="error" class="error">{{ error }}</p>
     <section class="subscription-summary card">
       <div>
-        <strong>{{ quota && quota.isPremium ? 'Offre Pro active' : 'Offre gratuite' }}</strong>
+        <strong>{{ quota && quota.isPremium ? 'Pro plan active' : 'Free plan' }}</strong>
         <p v-if="quota && !quota.isPremium">
-          {{ quota.remaining }} réservation de salle restante cette semaine
-          (renouvellement le {{ quota.weekStartsAt }}).
+          {{ quota.remaining }} room booking remaining this week
+          (renewed on {{ quota.weekStartsAt }}).
         </p>
-        <p v-else-if="quota">Réservations de salles illimitées. Les groupes restent accessibles à tous.</p>
+        <p v-else-if="quota">Unlimited room bookings. Groups remain accessible to everyone.</p>
       </div>
-      <RouterLink to="/plans" class="btn">{{ quota && quota.isPremium ? 'Mon abonnement' : 'Passer Pro' }}</RouterLink>
+      <RouterLink to="/plans" class="btn">{{ quota && quota.isPremium ? 'My subscription' : 'Upgrade to Pro' }}</RouterLink>
     </section>
 
-    <h2>Mes salles réservées</h2>
-    <p v-if="created.length === 0">Aucune réservation à venir.</p>
+    <h2>My reserved rooms</h2>
+    <p v-if="created.length === 0">No upcoming bookings.</p>
 
     <!-- Le conteneur permet de faire défiler le tableau sur un petit écran -->
     <div v-else class="table-wrapper">
       <table class="data-table">
-        <caption class="sr-only">Mes réservations à venir</caption>
+        <caption class="sr-only">My upcoming bookings</caption>
         <thead>
           <tr>
-            <th scope="col">Salle</th>
-            <th scope="col">Jour</th>
-            <th scope="col">Horaires</th>
-            <th scope="col">Motif</th>
-            <th scope="col">Matière</th>
-            <th scope="col">Groupe</th>
+            <th scope="col">Room</th>
+            <th scope="col">Day</th>
+            <th scope="col">Time</th>
+            <th scope="col">Purpose</th>
+            <th scope="col">Subject</th>
+            <th scope="col">Group</th>
             <th scope="col">Actions</th>
           </tr>
         </thead>
@@ -126,11 +126,11 @@ async function saveEdit(booking) {
               <td>{{ typeLabels[b.type] }}</td>
               <td>{{ b.Subject ? b.Subject.name : '—' }}</td>
               <td>
-                <span class="badge">Ouvert</span>
+                <span class="badge">Open</span>
               </td>
               <td>
-                <button type="button" @click="startEdit(b)">Modifier</button>
-                <button type="button" class="btn-secondary-button" @click="removeBooking(b)">Supprimer</button>
+                <button type="button" @click="startEdit(b)">Edit</button>
+                <button type="button" class="btn-secondary-button" @click="removeBooking(b)">Delete</button>
               </td>
             </tr>
 
@@ -142,8 +142,8 @@ async function saveEdit(booking) {
                   <input :id="'desc' + b.id" type="text" maxlength="255" v-model="editForm.description" />
 
                   <div class="modal-buttons">
-                    <button type="submit">Enregistrer</button>
-                    <button type="button" class="btn-secondary-button" @click="editingId = null">Annuler</button>
+                    <button type="submit">Save</button>
+                    <button type="button" class="btn-secondary-button" @click="editingId = null">Cancel</button>
                   </div>
                 </form>
               </td>
@@ -153,20 +153,20 @@ async function saveEdit(booking) {
       </table>
     </div>
 
-    <h2>Les groupes que j'ai rejoints</h2>
-    <p v-if="joined.length === 0">Vous n'avez rejoint aucun groupe.</p>
+    <h2>Groups I joined</h2>
+    <p v-if="joined.length === 0">You haven't joined any groups.</p>
 
     <div v-else class="table-wrapper">
       <table class="data-table">
-        <caption class="sr-only">Les groupes que j'ai rejoints</caption>
+        <caption class="sr-only">Groups I joined</caption>
         <thead>
           <tr>
-            <th scope="col">Salle</th>
-            <th scope="col">Jour</th>
-            <th scope="col">Horaires</th>
-            <th scope="col">Motif</th>
-            <th scope="col">Matière</th>
-            <th scope="col">Mon statut</th>
+            <th scope="col">Room</th>
+            <th scope="col">Day</th>
+            <th scope="col">Time</th>
+            <th scope="col">Purpose</th>
+            <th scope="col">Subject</th>
+            <th scope="col">My status</th>
           </tr>
         </thead>
         <tbody>

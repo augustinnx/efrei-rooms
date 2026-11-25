@@ -8,20 +8,20 @@ import heroImage from '../assets/hero.svg'
       <div class="hero-text">
         <h1>EF'Rooms</h1>
         <p class="tagline">
-          Trouve une salle libre, réserve-la et révise avec d'autres étudiants.
+          Find a free room, book it, and study with other students.
         </p>
         <p>
-          Réserve une salle sur n'importe quel campus, dis ce que tu veux réviser
-          et laisse les autres te rejoindre. Fini les couloirs à chercher une
-          salle vide.
+          Book a room at any campus, share what you want to study,
+          and let others join you. No more wandering the corridors
+          looking for an empty room.
         </p>
         <div class="hero-buttons">
-          <RouterLink to="/register" class="btn">Inscription</RouterLink>
-          <RouterLink to="/login" class="btn btn-secondary">Connexion</RouterLink>
+          <RouterLink to="/register" class="btn">Sign up</RouterLink>
+          <RouterLink to="/login" class="btn btn-secondary">Log in</RouterLink>
         </div>
       </div>
 
-      <img :src="heroImage" alt="Planning de réservation de salles" class="hero-image" />
+      <img :src="heroImage" alt="Room booking schedule" class="hero-image" />
     </section>
   </main>
 </template>

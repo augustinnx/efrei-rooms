@@ -8,7 +8,7 @@ async function listCampuses(req, res) {
     res.json(campuses);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -21,7 +21,7 @@ async function listRooms(req, res) {
     if (req.query.campusId) {
       const campusId = parseInt(req.query.campusId, 10);
       if (Number.isNaN(campusId)) {
-        return res.status(400).json({ message: 'campusId invalide.' });
+        return res.status(400).json({ message: 'Invalid campusId.' });
       }
       where.campusId = campusId;
     }
@@ -34,7 +34,7 @@ async function listRooms(req, res) {
     res.json(rooms);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -45,7 +45,7 @@ async function listSubjects(req, res) {
     res.json(subjects);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 
@@ -59,7 +59,7 @@ async function listTeachers(req, res) {
     res.json(teachers);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).json({ message: 'Server error.' });
   }
 }
 

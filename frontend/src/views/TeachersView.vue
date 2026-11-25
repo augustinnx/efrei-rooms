@@ -11,10 +11,10 @@ const noPhoto = ref({})
 onMounted(async () => {
   try {
     const response = await fetch('http://localhost:3000/api/rooms/teachers')
-    if (!response.ok) throw new Error('Erreur serveur')
+    if (!response.ok) throw new Error('Server error')
     teachers.value = await response.json()
   } catch (e) {
-    error.value = 'Impossible de charger les professeurs.'
+    error.value = 'Unable to load teachers.'
   }
 })
 
@@ -31,8 +31,8 @@ function initials(name) {
 
 <template>
   <main class="container">
-    <RouterLink to="/dashboard">← Retour à l'accueil</RouterLink>
-    <h1>Contacter un professeur</h1>
+    <RouterLink to="/dashboard">← Back to home</RouterLink>
+    <h1>Contact a teacher</h1>
 
     <p v-if="error" class="error">{{ error }}</p>
 
@@ -42,7 +42,7 @@ function initials(name) {
         <img
           v-if="!noPhoto[t.id]"
           :src="`/teachers/${t.id}.jpg`"
-          :alt="`Photo de ${t.name}`"
+          :alt="`Photo of ${t.name}`"
           class="teacher-photo"
           @error="noPhoto[t.id] = true"
         />
@@ -53,7 +53,7 @@ function initials(name) {
         <div class="teacher-info">
           <h2>{{ t.name }}</h2>
           <p>{{ t.Subject.name }}</p>
-          <a class="email-link" :href="`mailto:${t.email}?subject=Question%20sur%20${encodeURIComponent(t.Subject.name)}`" :title="`Contacter ${t.name} par email`" :aria-label="`Contacter ${t.name} par email`">
+          <a class="email-link" :href="`mailto:${t.email}?subject=Question%20about%20${encodeURIComponent(t.Subject.name)}`" :title="`Contact ${t.name} by email`" :aria-label="`Contact ${t.name} by email`">
             <img :src="emailLogo" alt="" class="email-logo" />
           </a>
         </div>
