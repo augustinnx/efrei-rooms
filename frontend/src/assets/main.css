@@ -807,3 +807,24 @@ input[type='date'] {
 .teacher-info p {
   margin: 0.25rem 0 0.75rem;
 }
+
+/* Zones décoratives des plans : escaliers, sanitaires, accueil... */
+.decor-block {
+  fill: #f3f4f6;
+  stroke: #9ca3af;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+/* L'atrium de L'Aquarium */
+.atrium {
+  fill: #dbeafe;
+  stroke: #93c5fd;
+}
+
+.decor-label {
+  font-size: 14px;
+  text-anchor: middle;
+  fill: #6b7280;
+  pointer-events: none;
+}

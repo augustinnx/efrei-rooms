@@ -2,6 +2,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BookingModal from '../components/BookingModal.vue'
+import { getPlan } from '../data/campusPlans'
+
 
 const route = useRoute()
 const campuses = ref([])
@@ -98,23 +100,17 @@ const occupied = computed(() => {
   return map
 })
 
-// La position de chaque salle sur le plan : première moitié en haut, seconde moitié en bas
-const layout = computed(() => {
-  const half = Math.ceil(rooms.value.length / 2)
-  const width = half ? 660 / half : 0
-  return rooms.value.map((room, i) => {
-    const isTop = i < half
-    const col = isTop ? i : i - half
-    return {
-      room,
-      x: 20 + col * width,
-      y: isTop ? 20 : 230,
-      w: width,
-      h: 130,
-      booking: occupied.value[room.id] || null,
-    }
-  })
-})
+// Le plan du campus affiché (forme, zones décoratives et emplacements des salles)
+const plan = computed(() => getPlan(currentCampus.value ? currentCampus.value.name : ''))
+
+// Chaque salle reçoit un emplacement du plan, dans l'ordre : A1, A2, A3...
+const layout = computed(() =>
+  rooms.value.slice(0, plan.value.slots.length).map((room, i) => ({
+    room,
+    ...plan.value.slots[i], // x, y, w, h
+    booking: occupied.value[room.id] || null,
+  }))
+)
 
 // Les réservations de groupe restent visibles dans leur couleur dédiée.
 function stateOf(item) {
@@ -191,11 +187,14 @@ function onCreated() {
     <p v-if="message" class="success">{{ message }}</p>
     <p v-if="error" class="error">{{ error }}</p>
 
-    <!-- Le plan du campus, dessiné en SVG -->
-    <svg viewBox="0 0 700 380" class="plan" role="img" aria-label="Campus map">
-      <!-- Le couloir au milieu -->
-      <rect x="20" y="150" width="660" height="80" class="corridor" />
-      <text x="350" y="195" class="corridor-label">Corridor</text>
+    <svg :viewBox="`0 0 700 ${plan.height}`" class="plan" role="img" aria-label="Plan du campus">
+      <!-- Les zones qui ne sont pas des salles : couloirs, hall, escaliers... -->
+      <g v-for="(d, i) in plan.decor" :key="i">
+        <rect :x="d.x" :y="d.y" :width="d.w" :height="d.h" :class="d.kind" />
+        <text v-if="d.label" :x="d.x + d.w / 2" :y="d.y + d.h / 2 + 5" class="decor-label">
+          {{ d.label }}
+        </text>
+      </g>
 
       <!-- Une salle par élément de la liste -->
       <g
